@@ -4,15 +4,11 @@ import 'package:mobync/src/constants/sync_op_log_constants.dart';
 import 'package:mobync/src/models/models.dart';
 import 'package:mobync/src/utils/utils.dart';
 
-
 /// Mobync Client absctract class
 abstract class MobyncClient {
-  void _addSyncOperationLog(SyncOperation log){
+  void _addSyncOperationLog(SyncOperation log) {}
 
-  }
-
-  Map create(String where, Map what){
-
+  Map create(String where, Map what) {
     final log = new SyncOperation(
       logicalClock: 123,
       timestamp: getCurrentTimestamp(),
@@ -21,10 +17,9 @@ abstract class MobyncClient {
       operationInput: what,
     );
     _addSyncOperationLog(log);
-    /// then sync
   }
 
-  Map update(String where, Map what){
+  Map update(String where, Map what) {
     final log = new SyncOperation(
       logicalClock: 123,
       timestamp: getCurrentTimestamp(),
@@ -33,10 +28,9 @@ abstract class MobyncClient {
       operationInput: what,
     );
     _addSyncOperationLog(log);
-    /// then sync
   }
 
-  bool delete(String where, Map what){
+  bool delete(String where, Map what) {
     final log = new SyncOperation(
       logicalClock: 123,
       timestamp: getCurrentTimestamp(),
@@ -45,10 +39,7 @@ abstract class MobyncClient {
       operationInput: what,
     );
     _addSyncOperationLog(log);
-    /// then sync
   }
 
-  Map read(String where, Map what){
-
-  }
+  Map read(String where, Map what) {}
 }
