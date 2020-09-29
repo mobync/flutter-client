@@ -2,6 +2,8 @@
 
 Mobync Flutter Client Package
 
+[![Build Status](https://travis-ci.com/mobync/flutter-client.svg?token=zEuAJYpGFRGA9Uoccaqu&branch=master)](https://travis-ci.com/mobync/flutter-client)
+
 ## Getting Started
 
 This project is a starting point for a Dart
