@@ -1,13 +1,35 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobync/src/client.dart';
 
-import 'package:mobync/mobync.dart';
+class MyMobyncAPI extends MobyncClient {
+  MyMobyncAPI._privateConstructor();
+  static final MyMobyncAPI instance = MyMobyncAPI._privateConstructor();
+
+  @override
+  Map create(String where, Map what){
+    super.create(where, what);
+  }
+
+  @override
+  Map update(String where, Map what){
+    super.update(where, what);
+  }
+
+  @override
+  bool delete(String where, Map what){
+    super.delete(where, what);
+  }
+
+  @override
+  Map read(String where, Map what){
+
+  }
+}
 
 void main() {
-  test('adds one to input values', () {
-    final calculator = Calculator();
-    expect(calculator.addOne(2), 3);
-    expect(calculator.addOne(-7), -6);
-    expect(calculator.addOne(0), 1);
-    expect(() => calculator.addOne(null), throwsNoSuchMethodError);
+  test('Check singletion instantiation', () {
+    final a = MyMobyncAPI.instance;
+    final b = MyMobyncAPI.instance;
+    expect(a, equals(b));
   });
 }
