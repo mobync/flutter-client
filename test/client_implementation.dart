@@ -1,81 +1,60 @@
 import 'package:mobync/mobync.dart';
-import 'package:mobync/src/constants/constants.dart';
+import 'package:mobync/src/models/meta_sync_model.dart';
 import 'package:mobync/src/models/models.dart';
 
 class MyMobyncClient extends MobyncClient {
   MyMobyncClient._privateConstructor();
   static final MyMobyncClient instance = MyMobyncClient._privateConstructor();
 
-  Map<String, Map> _data = {};
+  Map<String, List> _data = {
+    'model1': [],
+    SyncMetaData.tableName: [],
+    SyncOperation.tableName: [],
+  };
 
   @override
-  Future<MobyncResponse> create(String where, Map what) {
-    /// Check if model exists.
-    if (!_data.containsKey(where)) _data[where] = {};
+  Future<void> createExecute(String where, Map what) {
+    for (int i = 0; i < _data[where].length; i++)
+      if (_data[where][i]['id'] == what['id']) {
+        throw Exception('Id already exists!');
+      }
 
-    if (what.containsKey('id') && _data[where].containsKey(what['id']))
-      return Future.value(MobyncResponse(
-        success: false,
-        message: 'Object id already exists',
-      ));
-
-    _data[where][what['id']] = what;
-
-    super.logSyncOperation(K_SYNC_OP_CREATE, where, what);
-
-    return Future.value(MobyncResponse(
-      success: true,
-      message: 'Objected created.',
-    ));
+    _data[where].add(what);
   }
 
   @override
-  Future<MobyncResponse> update(String where, Map what) {
-    if (!_data.containsKey(where) || _data[where][what['id']] == null)
-      return Future.value(MobyncResponse(
-        success: false,
-        message: 'Object id doesnt exist',
-      ));
-
-    what.forEach((key, value) {
-      _data[where][what['id']][key] = value;
-    });
-
-    super.logSyncOperation(K_SYNC_OP_UPDATE, where, what);
-
-    return Future.value(MobyncResponse(
-      success: true,
-      message: 'Objected updated.',
-    ));
+  Future<void> updateExecute(String where, Map what) {
+    for (int i = 0; i < _data[where].length; i++)
+      if (_data[where][i]['id'] == what['id']) {
+        what.forEach((key, value) {
+          _data[where][i][key] = value;
+        });
+      }
   }
 
   @override
-  Future<MobyncResponse> delete(String where, String id) {
-    if (!_data.containsKey(where) || !_data[where].containsKey(id))
-      return Future.value(MobyncResponse(
-        success: false,
-        message: 'Object id doesnt exist',
-      ));
+  Future<void> deleteExecute(String where, String id) {
+    var removedAt;
+    for (int i = 0; i < _data[where].length; i++)
+      if (_data[where][i]['id'] == id) {
+        removedAt = _data[where].removeAt(i);
+      }
 
-    _data[where].remove(id);
-
-    super.logSyncOperation(K_SYNC_OP_DELETE, where, {});
-
-    return Future.value(MobyncResponse(
-      success: true,
-      message: 'Objected deleted.',
-    ));
+    if (removedAt == null) throw Exception('Element not found.');
   }
 
+  @override
   Future<MobyncResponse> read(String where) {
-    if (!_data.containsKey(where))
+    try {
+      return Future.value(MobyncResponse(
+        success: true,
+        data: _data[where],
+      ));
+    } catch (e) {
       return Future.value(MobyncResponse(
         success: false,
+        message: e.toString(),
       ));
-
-    return Future.value(MobyncResponse(
-      success: true,
-      data: _data[where].values.toList(),
-    ));
+    }
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobync/src/client_helper.dart';
 import 'package:mobync/src/models/models.dart';
 
 import 'client_implementation.dart';
@@ -18,6 +17,7 @@ void main() {
     final obj3 = {'id': '2', 'campo1': 'cde'};
     MobyncResponse response3 = await client.create('model1', obj3);
     expect(response3.success, true);
+    print(response3.message);
 
     final obj4 = {'id': '1', 'campo1': 'xxx'};
     MobyncResponse response4 = await client.update('model1', obj4);
@@ -34,9 +34,7 @@ void main() {
     expect(response7.success, true);
     expect(response7.data, [obj4]);
 
-    final helper = MobyncClientHelper.instance;
-    List<SyncOperation> logs = await helper.getSyncOperationList();
-    print(logs.length);
-    print(logs.join("\n"));
+    MobyncResponse response8 = await client.read(SyncOperation.tableName);
+    print(response8);
   });
 }

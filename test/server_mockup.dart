@@ -2,8 +2,6 @@ import 'dart:math';
 
 import 'package:mobync/src/models/models.dart';
 
-import 'server_sync_response.dart';
-
 class ServerMockup {
   ServerMockup._privateConstructor();
   static final ServerMockup instance = ServerMockup._privateConstructor();
