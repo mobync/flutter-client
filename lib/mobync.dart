@@ -1,7 +1,6 @@
 library mobync;
 
 import 'package:mobync/constants/constants.dart';
-import 'package:mobync/models/meta_sync_model.dart';
 import 'package:mobync/models/models.dart';
 
 abstract class MobyncClient {
