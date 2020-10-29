@@ -3,7 +3,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
 
 class SyncOperation extends Comparable with EquatableMixin {
-  static String tableName = 'SyncOperationsTable';
   SyncOperation({
     @required this.logicalClock,
     @required this.timestamp,
@@ -15,6 +14,7 @@ class SyncOperation extends Comparable with EquatableMixin {
     if (id == null) id = new Uuid().v1();
   }
 
+  static final String tableName = 'SyncOperationsTable';
   String id;
   int logicalClock, timestamp;
   String operationType;

@@ -11,9 +11,12 @@ abstract class MobyncClient {
 
   Future<List> getSyncOperations({int logicalClock}) async {
     if (logicalClock == null) logicalClock = await getLogicalClock();
-    return await readExecute(SyncOperation.tableName, filters: [
-      ReadFilter('logicalClock', FilterType.majorOrEqual, logicalClock)
-    ]);
+    return await readExecute(
+      SyncOperation.tableName,
+      filters: [
+        ReadFilter('logicalClock', FilterType.majorOrEqual, logicalClock)
+      ],
+    );
   }
 
   Future<int> getLogicalClock() async {
@@ -24,13 +27,15 @@ abstract class MobyncClient {
 
   Future<void> setLogicalClock(int logicalClock) async {
     await updateExecute(
-        SyncMetaData.tableName, {'id': '0', 'logicalClock': logicalClock});
+      SyncMetaData.tableName,
+      {'id': SyncMetaData.id, 'logicalClock': logicalClock},
+    );
   }
 
   Future<MobyncResponse> create(String where, Map what) async {
     try {
-      createExecute(where, what);
-      createExecute(
+      await createExecute(where, what);
+      await createExecute(
           SyncOperation.tableName,
           SyncOperation(
             logicalClock: await getLogicalClock(),
@@ -54,8 +59,8 @@ abstract class MobyncClient {
 
   Future<MobyncResponse> update(String where, Map what) async {
     try {
-      updateExecute(where, what);
-      createExecute(
+      await updateExecute(where, what);
+      await createExecute(
           SyncOperation.tableName,
           SyncOperation(
             logicalClock: await getLogicalClock(),
@@ -79,8 +84,8 @@ abstract class MobyncClient {
 
   Future<MobyncResponse> delete(String where, String uuid) async {
     try {
-      deleteExecute(where, uuid);
-      createExecute(
+      await deleteExecute(where, uuid);
+      await createExecute(
           SyncOperation.tableName,
           SyncOperation(
             logicalClock: await getLogicalClock(),
