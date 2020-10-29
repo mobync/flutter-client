@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobync/src/client_helper.dart';
 import 'package:mobync/src/models/models.dart';
 
 import 'client_implementation.dart';
@@ -32,5 +33,10 @@ void main() {
     MobyncResponse response7 = await client.read('model1');
     expect(response7.success, true);
     expect(response7.data, [obj4]);
+
+    final helper = MobyncClientHelper.instance;
+    List<SyncOperation> logs = await helper.getSyncOperationList();
+    print(logs.length);
+    print(logs.join("\n"));
   });
 }

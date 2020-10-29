@@ -1,53 +1,27 @@
 library mobync;
 
-import 'package:mobync/src/constants/message_contants.dart';
-import 'package:mobync/src/constants/sync_op_log_constants.dart';
+import 'package:mobync/src/client_helper.dart';
 import 'package:mobync/src/models/models.dart';
 import 'package:mobync/src/utils/utils.dart';
-import 'package:synchronized/synchronized.dart';
 
 /// Mobync Client absctract class
 abstract class MobyncClient {
-  Lock _lock;
-
-  Lock get lock {
-    if (_lock == null) _lock = new Lock();
-    return _lock;
-  }
-
-  void _addSyncOperationLog(SyncOperation log) {}
-
-  Future<void> _logOperation(
+  Future<void> logSyncOperation(
     String opType,
     String where,
     Map what,
   ) async {
+    MobyncClientHelper helper = MobyncClientHelper.instance;
+
     final log = new SyncOperation(
-      logicalClock: 123,
+      logicalClock: helper.logicalClock,
       timestamp: getCurrentTimestamp(),
       operationType: opType,
       operationLocation: where,
       operationInput: what,
     );
-    _addSyncOperationLog(log);
-  }
 
-  Future<MobyncResponse> runOperation(
-    String opType,
-    String where,
-    Map what,
-    Function runOp,
-  ) async {
-    return await lock.synchronized(() async {
-      await runOp();
-      await _logOperation(opType, where, what);
-
-      var response = MobyncResponse(
-        success: true,
-        message: K_CLIENT_OP_SUCCESS,
-      );
-      return Future.value(response);
-    });
+    helper.addSyncOperation(log);
   }
 
   Future<MobyncResponse> create(String where, Map what);

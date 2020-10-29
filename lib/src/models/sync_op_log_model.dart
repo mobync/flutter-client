@@ -33,4 +33,9 @@ class SyncOperation extends Comparable with EquatableMixin {
         return 0;
     }
   }
+
+  @override
+  String toString() {
+    return 'SyncOperation: { clock: $logicalClock, timestamp: $timestamp, opType: $operationType, where: $operationLocation, data: $operationInput }';
+  }
 }

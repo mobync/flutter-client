@@ -1,4 +1,5 @@
 import 'package:mobync/mobync.dart';
+import 'package:mobync/src/constants/constants.dart';
 import 'package:mobync/src/models/models.dart';
 
 class MyMobyncClient extends MobyncClient {
@@ -20,6 +21,8 @@ class MyMobyncClient extends MobyncClient {
 
     _data[where][what['id']] = what;
 
+    super.logSyncOperation(K_SYNC_OP_CREATE, where, what);
+
     return Future.value(MobyncResponse(
       success: true,
       message: 'Objected created.',
@@ -38,6 +41,8 @@ class MyMobyncClient extends MobyncClient {
       _data[where][what['id']][key] = value;
     });
 
+    super.logSyncOperation(K_SYNC_OP_UPDATE, where, what);
+
     return Future.value(MobyncResponse(
       success: true,
       message: 'Objected updated.',
@@ -53,6 +58,8 @@ class MyMobyncClient extends MobyncClient {
       ));
 
     _data[where].remove(id);
+
+    super.logSyncOperation(K_SYNC_OP_DELETE, where, {});
 
     return Future.value(MobyncResponse(
       success: true,
