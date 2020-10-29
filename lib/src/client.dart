@@ -8,19 +8,23 @@ abstract class MobyncClient {
   Future<void> createExecute(String where, Map what);
   Future<void> updateExecute(String where, Map what);
   Future<void> deleteExecute(String where, String uid);
-  Future<MobyncResponse> read(String where);
+  Future<List> readExecute(String where, {List<ReadFilter> filters});
+
+  Future<List> getSyncOperations({int logicalClock}) async {
+    if (logicalClock == null) logicalClock = await getLogicalClock();
+    return await readExecute(SyncOperation.tableName, filters: [
+      ReadFilter('logicalClock', FilterType.majorOrEqual, logicalClock)
+    ]);
+  }
 
   Future<int> getLogicalClock() async {
-    return await read(SyncMetaData.tableName).then((value) {
-      if (value.success && value.data.length > 0)
-        return value.data[0];
-      else
-        return 0;
+    return await readExecute(SyncMetaData.tableName).then((value) {
+      return value.length > 0 ? value[0] : 0;
     });
   }
 
   Future<void> setLogicalClock(int logicalClock) async {
-    await update(
+    await updateExecute(
         SyncMetaData.tableName, {'id': '0', 'logicalClock': logicalClock});
   }
 
@@ -90,6 +94,21 @@ abstract class MobyncClient {
       return Future.value(MobyncResponse(
         success: true,
         message: 'Objected updated.',
+      ));
+    } catch (e) {
+      return Future.value(MobyncResponse(
+        success: false,
+        message: e.toString(),
+      ));
+    }
+  }
+
+  Future<MobyncResponse> read(String where, {List<ReadFilter> filters}) async {
+    try {
+      List _filteredData = await readExecute(where, filters: filters);
+      return Future.value(MobyncResponse(
+        success: true,
+        data: _filteredData,
       ));
     } catch (e) {
       return Future.value(MobyncResponse(

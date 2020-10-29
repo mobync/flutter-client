@@ -34,7 +34,10 @@ void main() {
     expect(response7.success, true);
     expect(response7.data, [obj4]);
 
-    MobyncResponse response8 = await client.read(SyncOperation.tableName);
-    print(response8);
+    List response8 = await client.getSyncOperations(logicalClock: 0);
+    print(response8.length);
+
+    List response9 = await client.getSyncOperations(logicalClock: 1);
+    print(response9.length);
   });
 }

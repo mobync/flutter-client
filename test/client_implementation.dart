@@ -1,4 +1,5 @@
 import 'package:mobync/mobync.dart';
+import 'package:mobync/src/constants/constants.dart';
 import 'package:mobync/src/models/meta_sync_model.dart';
 import 'package:mobync/src/models/models.dart';
 
@@ -44,17 +45,41 @@ class MyMobyncClient extends MobyncClient {
   }
 
   @override
-  Future<MobyncResponse> read(String where) {
-    try {
-      return Future.value(MobyncResponse(
-        success: true,
-        data: _data[where],
-      ));
-    } catch (e) {
-      return Future.value(MobyncResponse(
-        success: false,
-        message: e.toString(),
-      ));
-    }
+  Future<List> readExecute(String where, {List<ReadFilter> filters}) {
+    List _filteredData = _data[where];
+    if (filters != null)
+      filters.forEach((filter) {
+        switch (filter.filterBy) {
+          case FilterType.inside:
+            _filteredData = _filteredData.where((v) {
+              return filter.data.contains(v[filter.fieldName]);
+            }).toList();
+            break;
+          case FilterType.major:
+            _filteredData = _filteredData.where((v) {
+              return v[filter.fieldName] > filter.data;
+            }).toList();
+            break;
+          case FilterType.majorOrEqual:
+            _filteredData = _filteredData.where((v) {
+              return v[filter.fieldName] >= filter.data;
+            }).toList();
+            break;
+          case FilterType.minor:
+            _filteredData = _filteredData.where((v) {
+              return v[filter.fieldName] < filter.data;
+            }).toList();
+            break;
+          case FilterType.minorOrEqual:
+            _filteredData = _filteredData.where((v) {
+              return v[filter.fieldName] <= filter.data;
+            }).toList();
+            break;
+          default:
+            break;
+        }
+      });
+
+    return Future.value(_filteredData);
   }
 }

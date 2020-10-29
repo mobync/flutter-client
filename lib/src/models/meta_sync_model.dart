@@ -3,11 +3,11 @@ import 'package:flutter/cupertino.dart';
 
 class SyncMetaData extends Equatable {
   static String tableName = 'SyncMetaDataTable';
-  static final id = '0';
   SyncMetaData({
     @required this.logicalClock,
   });
 
+  static final id = '0';
   int logicalClock;
 
   @override
