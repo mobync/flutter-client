@@ -1,7 +1,7 @@
 import 'package:mobync/mobync.dart';
-import 'package:mobync/src/constants/constants.dart';
-import 'package:mobync/src/models/meta_sync_model.dart';
-import 'package:mobync/src/models/models.dart';
+import 'package:mobync/constants/constants.dart';
+import 'package:mobync/models/meta_sync_model.dart';
+import 'package:mobync/models/models.dart';
 
 class MyMobyncClient extends MobyncClient {
   MyMobyncClient._privateConstructor();

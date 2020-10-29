@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:mobync/src/models/models.dart';
+import 'package:mobync/models/models.dart';
 
 class ServerSyncResponse extends Equatable {
   const ServerSyncResponse({

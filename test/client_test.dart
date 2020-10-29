@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobync/src/models/models.dart';
+import 'package:mobync/models/models.dart';
 
 import 'client_implementation.dart';
 

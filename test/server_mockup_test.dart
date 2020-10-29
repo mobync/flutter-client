@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobync/src/constants/constants.dart';
-import 'package:mobync/src/models/models.dart';
+import 'package:mobync/constants/constants.dart';
+import 'package:mobync/models/models.dart';
 
 import 'server_mockup.dart';
 

@@ -1,4 +1,4 @@
-import 'package:mobync/src/constants/constants.dart';
+import 'package:mobync/constants/constants.dart';
 
 class ReadFilter {
   String fieldName;

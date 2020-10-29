@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:mobync/src/models/models.dart';
+import 'package:mobync/models/models.dart';
 
 class ServerMockup {
   ServerMockup._privateConstructor();
