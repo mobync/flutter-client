@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 class MobyncResponse extends Equatable {
   final bool success;
   final String message;
-  final List<Map> data;
+  final List data;
   const MobyncResponse({
     @required this.success,
     this.message,

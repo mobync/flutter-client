@@ -3,7 +3,6 @@ import 'package:mobync/src/classes/classes.dart';
 import 'package:mobync/src/constants/constants.dart';
 import 'package:mobync/src/models/models.dart';
 
-
 void main() {
   test('Server mockup - singleton instatiation', () {
     final a = ServerMockup.instance;
