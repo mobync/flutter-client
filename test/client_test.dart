@@ -35,7 +35,7 @@ void main() {
     expect(response7.data, [obj4]);
 
     List response8 = await client.getSyncOperations(logicalClock: 0);
-    print(response8.length);
+    print(response8);
 
     List response9 = await client.getSyncOperations(logicalClock: 1);
     print(response9.length);

@@ -2,27 +2,26 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:uuid/uuid.dart';
 
-class SyncOperation extends Comparable with EquatableMixin {
-  SyncOperation({
+class SyncDiff extends Comparable with EquatableMixin {
+  SyncDiff({
     @required this.logicalClock,
     @required this.timestamp,
     @required this.operationType,
-    @required this.operationLocation,
-    @required this.operationInput,
+    @required this.modelName,
+    @required this.operationMetadata,
     this.id,
   }) {
-    if (id == null) id = new Uuid().v1();
+    this.id = id != null ? id : Uuid().v1();
   }
 
-  static final String tableName = 'SyncOperationsTable';
+  static final String tableName = 'MobyncSyncOperationsTable';
   String id;
+  String operationType, modelName;
+  Map operationMetadata;
   int logicalClock, timestamp;
-  String operationType;
-  String operationLocation;
-  Map operationInput;
 
   @override
-  List<Object> get props => [logicalClock];
+  List<Object> get props => [id];
 
   @override
   int compareTo(other) {
@@ -40,25 +39,20 @@ class SyncOperation extends Comparable with EquatableMixin {
     }
   }
 
-  @override
-  String toString() {
-    return 'SyncOperation: {\n\tclock: $logicalClock,\n\ttimestamp: $timestamp,\n\topType: $operationType,\n\twhere: $operationLocation,\n\tdata: $operationInput\n}';
-  }
-
   fromMap(Map<String, dynamic> map) {
     assert(map.containsKey('id'));
     assert(map.containsKey('logicalClock'));
     assert(map.containsKey('timestamp'));
     assert(map.containsKey('operationType'));
-    assert(map.containsKey('operationLocation'));
-    assert(map.containsKey('operationInput'));
+    assert(map.containsKey('modelName'));
+    assert(map.containsKey('operationMetadata'));
 
     id = map['id'];
     logicalClock = map['logicalClock'];
     timestamp = map['timestamp'];
     operationType = map['operationType'];
-    operationLocation = map['operationLocation'];
-    operationInput = map['operationInput'];
+    modelName = map['modelName'];
+    operationMetadata = map['operationMetadata'];
   }
 
   Map<String, dynamic> toMap() {
@@ -67,9 +61,20 @@ class SyncOperation extends Comparable with EquatableMixin {
       'logicalClock': logicalClock,
       'timestamp': timestamp,
       'operationType': operationType,
-      'operationLocation': operationLocation,
-      'operationInput': operationInput,
+      'modelName': modelName,
+      'operationMetadata': operationMetadata,
     };
     return map;
+  }
+
+  @override
+  String toString() {
+    return 'SyncDiff: {'
+        'clock: $logicalClock,'
+        'timestamp: $timestamp,'
+        'opType: $operationType,'
+        'odelName: $modelName,'
+        'perationMetadata: $operationMetadata'
+        '}';
   }
 }

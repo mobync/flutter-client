@@ -10,7 +10,7 @@ class MyMobyncClient extends MobyncClient {
   Map<String, List> _data = {
     'model1': [],
     SyncMetaData.tableName: [],
-    SyncOperation.tableName: [],
+    SyncDiff.tableName: [],
   };
 
   @override

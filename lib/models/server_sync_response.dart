@@ -5,12 +5,12 @@ import 'package:mobync/models/models.dart';
 class ServerSyncResponse extends Equatable {
   ServerSyncResponse({
     @required this.logicalClock,
-    @required this.syncOperationList,
+    @required this.diffs,
   });
 
   final int logicalClock;
-  final List<SyncOperation> syncOperationList;
+  final List<SyncDiff> diffs;
 
   @override
-  List<Object> get props => [logicalClock, syncOperationList];
+  List<Object> get props => [logicalClock, diffs];
 }

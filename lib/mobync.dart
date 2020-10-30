@@ -12,7 +12,7 @@ abstract class MobyncClient {
   Future<List> getSyncOperations({int logicalClock}) async {
     if (logicalClock == null) logicalClock = await getLogicalClock();
     return await readExecute(
-      SyncOperation.tableName,
+      SyncDiff.tableName,
       filters: [
         ReadFilter('logicalClock', FilterType.majorOrEqual, logicalClock)
       ],
@@ -36,13 +36,13 @@ abstract class MobyncClient {
     try {
       await createExecute(where, what);
       await createExecute(
-          SyncOperation.tableName,
-          SyncOperation(
+          SyncDiff.tableName,
+          SyncDiff(
             logicalClock: await getLogicalClock(),
             timestamp: DateTime.now().millisecondsSinceEpoch,
-            operationType: K_SYNC_OP_CREATE,
-            operationLocation: where,
-            operationInput: what,
+            operationType: CREATE_OPERATION,
+            modelName: where,
+            operationMetadata: what,
           ).toMap());
 
       return Future.value(MobyncResponse(
@@ -61,13 +61,13 @@ abstract class MobyncClient {
     try {
       await updateExecute(where, what);
       await createExecute(
-          SyncOperation.tableName,
-          SyncOperation(
+          SyncDiff.tableName,
+          SyncDiff(
             logicalClock: await getLogicalClock(),
             timestamp: DateTime.now().millisecondsSinceEpoch,
-            operationType: K_SYNC_OP_UPDATE,
-            operationLocation: where,
-            operationInput: what,
+            operationType: UPDATE_OPERATION,
+            modelName: where,
+            operationMetadata: what,
           ).toMap());
 
       return Future.value(MobyncResponse(
@@ -82,17 +82,17 @@ abstract class MobyncClient {
     }
   }
 
-  Future<MobyncResponse> delete(String where, String uuid) async {
+  Future<MobyncResponse> delete(String where, String id) async {
     try {
-      await deleteExecute(where, uuid);
+      await deleteExecute(where, id);
       await createExecute(
-          SyncOperation.tableName,
-          SyncOperation(
+          SyncDiff.tableName,
+          SyncDiff(
             logicalClock: await getLogicalClock(),
             timestamp: DateTime.now().millisecondsSinceEpoch,
-            operationType: K_SYNC_OP_DELETE,
-            operationLocation: where,
-            operationInput: {},
+            operationType: DELETE_OPERATION,
+            modelName: where,
+            operationMetadata: {'id': id},
           ).toMap());
 
       return Future.value(MobyncResponse(

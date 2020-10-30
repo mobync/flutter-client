@@ -21,7 +21,7 @@ void main() {
       userSyncOperationList: [],
     );
     expect(outputClient.logicalClock, 0);
-    expect(outputClient.syncOperationList, []);
+    expect(outputClient.diffs, []);
   });
 
   test(
@@ -29,24 +29,24 @@ void main() {
       () async {
     final server = ServerMockup.instance;
 
-    List<SyncOperation> syncOperationList = [
-      SyncOperation(
+    List<SyncDiff> syncOperationList = [
+      SyncDiff(
         logicalClock: 1,
         timestamp: new DateTime.now()
             .subtract(Duration(minutes: 2))
             .millisecondsSinceEpoch,
-        operationType: K_SYNC_OP_CREATE,
-        operationInput: {'a': 123},
-        operationLocation: 'data_type_1',
+        operationType: CREATE_OPERATION,
+        modelName: 'data_type_1',
+        operationMetadata: {'a': 123},
       ),
-      SyncOperation(
+      SyncDiff(
         logicalClock: 1,
         timestamp: new DateTime.now()
             .subtract(Duration(minutes: 1))
             .millisecondsSinceEpoch,
-        operationType: K_SYNC_OP_CREATE,
-        operationInput: {'a': 123},
-        operationLocation: 'data_type_1',
+        operationType: CREATE_OPERATION,
+        modelName: 'data_type_1',
+        operationMetadata: {'a': 123},
       ),
     ];
 
@@ -57,7 +57,7 @@ void main() {
       userSyncOperationList: syncOperationList,
     );
     expect(outputClient1.logicalClock, 2);
-    expect(outputClient1.syncOperationList, []);
+    expect(outputClient1.diffs, []);
 
     /// User2 syncs for the first time.
     ServerSyncResponse outputClient2 = await server.sync(
@@ -66,7 +66,7 @@ void main() {
       userSyncOperationList: [],
     );
     expect(outputClient2.logicalClock, 0);
-    expect(outputClient2.syncOperationList, []);
+    expect(outputClient2.diffs, []);
 
     /// Another client from User1 then syncs and get the stored data.
     ServerSyncResponse outputClient3 = await server.sync(
@@ -75,6 +75,6 @@ void main() {
       userSyncOperationList: [],
     );
     expect(outputClient3.logicalClock, 2);
-    expect(outputClient3.syncOperationList, syncOperationList);
+    expect(outputClient3.diffs, syncOperationList);
   });
 }

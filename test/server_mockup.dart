@@ -7,7 +7,7 @@ class ServerMockup {
   static final ServerMockup instance = ServerMockup._privateConstructor();
 
   /// Mockup for the SyncOperation lists from each user
-  Map<String, List<SyncOperation>> syncOperationListByOwner = {};
+  Map<String, List<SyncDiff>> syncOperationListByOwner = {};
 
   /// Mockup for the LogicalClock from each user
   Map<String, int> logicalClockByOwner = {};
@@ -22,7 +22,7 @@ class ServerMockup {
   Future<ServerSyncResponse> sync({
     String owner,
     int clientLogicalClock,
-    List<SyncOperation> userSyncOperationList,
+    List<SyncDiff> userSyncOperationList,
   }) {
     if (!syncOperationListByOwner.containsKey(owner)) {
       syncOperationListByOwner[owner] = [];
@@ -44,7 +44,7 @@ class ServerMockup {
         .toList();
     var response = ServerSyncResponse(
       logicalClock: logicalClockByOwner[owner],
-      syncOperationList: syncOperationResponseList,
+      diffs: syncOperationResponseList,
     );
     return Future.value(response);
   }
