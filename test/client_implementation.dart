@@ -3,6 +3,17 @@ import 'package:mobync/constants/constants.dart';
 import 'package:mobync/models/meta_sync_model.dart';
 import 'package:mobync/models/models.dart';
 
+class ServerMockup {
+  ServerMockup._privateConstructor();
+  static final ServerMockup instance = ServerMockup._privateConstructor();
+
+  List<SyncDiff> data = [];
+
+  Future<List<SyncDiff>> syncEndpoint(List<SyncDiff> userDiffs) {
+    return Future.value(data);
+  }
+}
+
 class MyMobyncClient extends MobyncClient {
   MyMobyncClient._privateConstructor();
   static final MyMobyncClient instance = MyMobyncClient._privateConstructor();
@@ -83,5 +94,11 @@ class MyMobyncClient extends MobyncClient {
       });
 
     return Future.value(_filteredData);
+  }
+
+  Future<List<SyncDiff>> fetchUpstreamDiffs(List<SyncDiff> localDiffs) async {
+    ServerMockup instance = ServerMockup.instance;
+    List<SyncDiff> upstreamDiffs = await instance.syncEndpoint(localDiffs);
+    return Future.value(upstreamDiffs);
   }
 }

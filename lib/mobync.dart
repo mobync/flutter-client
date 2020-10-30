@@ -10,6 +10,9 @@ abstract class MobyncClient {
   Future<Map> deleteExecute(String where, String uid);
   Future<List<Map>> readExecute(String where, {List<ReadFilter> filters});
 
+  /// Note: it may handle proper auth on upstream diffs fetch.
+  Future<List<SyncDiff>> fetchUpstreamDiffs(List<SyncDiff> localDiffs);
+
   Future<List<SyncDiff>> getSyncDiffs({int logicalClock}) async {
     if (logicalClock == null) logicalClock = await getLogicalClock();
     List<Map> maps = await readExecute(
@@ -54,7 +57,7 @@ abstract class MobyncClient {
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
             type: CREATE_OPERATION,
             model: model,
-            metadata: _shallowCopy(metadata),
+            metadata: shallowCopy(metadata),
           ).toMap());
 
       return Future.value(MobyncResponse(
@@ -80,7 +83,7 @@ abstract class MobyncClient {
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
             type: UPDATE_OPERATION,
             model: model,
-            metadata: _shallowCopy(metadata),
+            metadata: shallowCopy(metadata),
           ).toMap());
 
       return Future.value(MobyncResponse(
@@ -136,11 +139,45 @@ abstract class MobyncClient {
     }
   }
 
-  Map _shallowCopy(Map obj) {
+  Future<void> sync() async {
+    List<SyncDiff> localDiffs = await getSyncDiffs();
+    List<SyncDiff> upstreamDiffs = await fetchUpstreamDiffs(localDiffs);
+    upstreamDiffs.sort();
+    executeSyncDiffs(upstreamDiffs);
+  }
+
+  Future<void> executeSyncDiffs(List<SyncDiff> diffs) async {
+    diffs.forEach((el) async {
+      Map res;
+      Map metadata = shallowCopy(el.metadata);
+      switch (el.type) {
+        case CREATE_OPERATION:
+          res = await createExecute(el.model, metadata);
+          break;
+        case UPDATE_OPERATION:
+          res = await createExecute(el.model, metadata);
+          break;
+        case DELETE_OPERATION:
+          res = await deleteExecute(el.model, metadata['id']);
+          break;
+        default:
+          throw Exception('Invalid Operation.');
+          break;
+      }
+
+      if (res != null) await createExecute(SyncDiff.tableName, el.toMap());
+    });
+  }
+
+  shallowCopy(obj) {
     if (obj == null) return null;
 
-    Map res = {};
-    obj.forEach((key, value) => res[key] = value);
-    return res;
+    if (obj is Map) {
+      Map res = {};
+      obj.forEach((key, value) => res[key] = value);
+      return res;
+    }
+
+    throw Exception('Shallow copy not supported for this type.');
   }
 }

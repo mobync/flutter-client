@@ -15,7 +15,7 @@ void main() {
     expect(logicalClock2, 10);
   });
 
-  test('Client perform simple operations', () async {
+  test('test diffs for sequence of local operations', () async {
     final client = MyMobyncClient.instance;
 
     final obj1 = {'id': '1', 'campo1': 'abc'};
@@ -76,4 +76,6 @@ void main() {
           ]
         ]);
   });
+
+  test('test upstream diffs fetch', () async {});
 }
