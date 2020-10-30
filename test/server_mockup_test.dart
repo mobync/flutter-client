@@ -35,18 +35,18 @@ void main() {
         utcTimestamp: new DateTime.now()
             .subtract(Duration(minutes: 2))
             .millisecondsSinceEpoch,
-        operationType: CREATE_OPERATION,
+        type: CREATE_OPERATION,
         modelName: 'data_type_1',
-        operationMetadata: {'a': 123},
+        metadata: {'a': 123},
       ),
       SyncDiff(
         logicalClock: 1,
         utcTimestamp: new DateTime.now()
             .subtract(Duration(minutes: 1))
             .millisecondsSinceEpoch,
-        operationType: CREATE_OPERATION,
+        type: CREATE_OPERATION,
         modelName: 'data_type_1',
-        operationMetadata: {'a': 123},
+        metadata: {'a': 123},
       ),
     ];
 

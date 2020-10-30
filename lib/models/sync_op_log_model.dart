@@ -6,9 +6,9 @@ class SyncDiff extends Comparable with EquatableMixin {
   SyncDiff({
     @required this.logicalClock,
     @required this.utcTimestamp,
-    @required this.operationType,
+    @required this.type,
     @required this.modelName,
-    @required this.operationMetadata,
+    @required this.metadata,
     this.id,
   }) {
     this.id = id != null ? id : Uuid().v1();
@@ -16,19 +16,13 @@ class SyncDiff extends Comparable with EquatableMixin {
 
   static final String tableName = 'MobyncSyncDiffsTable';
   String id;
-  String operationType, modelName;
-  Map operationMetadata;
+  String type, modelName;
+  Map metadata;
   int logicalClock, utcTimestamp;
 
   @override
-  List<Object> get props => [
-        id,
-        logicalClock,
-        utcTimestamp,
-        operationType,
-        modelName,
-        operationMetadata
-      ];
+  List<Object> get props =>
+      [id, logicalClock, utcTimestamp, type, modelName, metadata];
 
   @override
   int compareTo(other) {
@@ -57,9 +51,9 @@ class SyncDiff extends Comparable with EquatableMixin {
     id = map['id'];
     logicalClock = map['logicalClock'];
     utcTimestamp = map['utcTimestamp'];
-    operationType = map['operationType'];
+    type = map['operationType'];
     modelName = map['modelName'];
-    operationMetadata = map['operationMetadata'];
+    metadata = map['operationMetadata'];
   }
 
   Map<String, dynamic> toMap() {
@@ -67,9 +61,9 @@ class SyncDiff extends Comparable with EquatableMixin {
       'id': id,
       'logicalClock': logicalClock,
       'utcTimestamp': utcTimestamp,
-      'operationType': operationType,
+      'operationType': type,
       'modelName': modelName,
-      'operationMetadata': operationMetadata,
+      'operationMetadata': metadata,
     };
     return map;
   }
@@ -80,9 +74,9 @@ class SyncDiff extends Comparable with EquatableMixin {
         'id: $id,'
         'clock: $logicalClock,'
         'utcTimestamp: $utcTimestamp,'
-        'opType: $operationType,'
+        'opType: $type,'
         'modelName: $modelName,'
-        'operationMetadata: $operationMetadata'
+        'operationMetadata: $metadata'
         '}';
   }
 }

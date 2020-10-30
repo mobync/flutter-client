@@ -50,9 +50,9 @@ abstract class MobyncClient {
           SyncDiff(
             logicalClock: await getLogicalClock(),
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
-            operationType: CREATE_OPERATION,
+            type: CREATE_OPERATION,
             modelName: model,
-            operationMetadata: _shallowCopy(metadata),
+            metadata: _shallowCopy(metadata),
           ).toMap());
 
       return Future.value(MobyncResponse(
@@ -75,9 +75,9 @@ abstract class MobyncClient {
           SyncDiff(
             logicalClock: await getLogicalClock(),
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
-            operationType: UPDATE_OPERATION,
+            type: UPDATE_OPERATION,
             modelName: model,
-            operationMetadata: metadata,
+            metadata: metadata,
           ).toMap());
 
       return Future.value(MobyncResponse(
@@ -100,9 +100,9 @@ abstract class MobyncClient {
           SyncDiff(
             logicalClock: await getLogicalClock(),
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
-            operationType: DELETE_OPERATION,
+            type: DELETE_OPERATION,
             modelName: model,
-            operationMetadata: {'id': id},
+            metadata: {'id': id},
           ).toMap());
 
       return Future.value(MobyncResponse(

@@ -49,12 +49,7 @@ void main() {
     expect(res8.length, 4);
     expect(
         res8
-            .map((e) => [
-                  e.logicalClock,
-                  e.operationType,
-                  e.modelName,
-                  e.operationMetadata
-                ])
+            .map((e) => [e.logicalClock, e.type, e.modelName, e.metadata])
             .toList(),
         [
           [
