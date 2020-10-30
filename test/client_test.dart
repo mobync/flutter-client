@@ -48,9 +48,7 @@ void main() {
     List<SyncDiff> res8 = await client.getSyncDiffs();
     expect(res8.length, 4);
     expect(
-        res8
-            .map((e) => [e.logicalClock, e.type, e.modelName, e.metadata])
-            .toList(),
+        res8.map((e) => [e.logicalClock, e.type, e.model, e.metadata]).toList(),
         [
           [
             10,

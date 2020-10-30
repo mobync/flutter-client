@@ -36,7 +36,7 @@ void main() {
             .subtract(Duration(minutes: 2))
             .millisecondsSinceEpoch,
         type: CREATE_OPERATION,
-        modelName: 'data_type_1',
+        model: 'data_type_1',
         metadata: {'a': 123},
       ),
       SyncDiff(
@@ -45,7 +45,7 @@ void main() {
             .subtract(Duration(minutes: 1))
             .millisecondsSinceEpoch,
         type: CREATE_OPERATION,
-        modelName: 'data_type_1',
+        model: 'data_type_1',
         metadata: {'a': 123},
       ),
     ];

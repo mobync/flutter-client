@@ -2,6 +2,7 @@ library mobync;
 
 import 'package:mobync/constants/constants.dart';
 import 'package:mobync/models/models.dart';
+import 'package:uuid/uuid.dart';
 
 abstract class MobyncClient {
   Future<Map> createExecute(String where, Map what);
@@ -48,10 +49,11 @@ abstract class MobyncClient {
       await createExecute(
           SyncDiff.tableName,
           SyncDiff(
+            id: Uuid().v1(),
             logicalClock: await getLogicalClock(),
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
             type: CREATE_OPERATION,
-            modelName: model,
+            model: model,
             metadata: _shallowCopy(metadata),
           ).toMap());
 
@@ -73,11 +75,12 @@ abstract class MobyncClient {
       await createExecute(
           SyncDiff.tableName,
           SyncDiff(
+            id: Uuid().v1(),
             logicalClock: await getLogicalClock(),
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
             type: UPDATE_OPERATION,
-            modelName: model,
-            metadata: metadata,
+            model: model,
+            metadata: _shallowCopy(metadata),
           ).toMap());
 
       return Future.value(MobyncResponse(
@@ -98,10 +101,11 @@ abstract class MobyncClient {
       await createExecute(
           SyncDiff.tableName,
           SyncDiff(
+            id: Uuid().v1(),
             logicalClock: await getLogicalClock(),
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
             type: DELETE_OPERATION,
-            modelName: model,
+            model: model,
             metadata: {'id': id},
           ).toMap());
 

@@ -1,28 +1,25 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:uuid/uuid.dart';
 
 class SyncDiff extends Comparable with EquatableMixin {
   SyncDiff({
-    @required this.logicalClock,
-    @required this.utcTimestamp,
-    @required this.type,
-    @required this.modelName,
-    @required this.metadata,
     this.id,
-  }) {
-    this.id = id != null ? id : Uuid().v1();
-  }
+    this.logicalClock,
+    this.utcTimestamp,
+    this.type,
+    this.model,
+    this.metadata,
+  });
 
   static final String tableName = 'MobyncSyncDiffsTable';
   String id;
-  String type, modelName;
+  String type, model;
   Map metadata;
   int logicalClock, utcTimestamp;
 
   @override
   List<Object> get props =>
-      [id, logicalClock, utcTimestamp, type, modelName, metadata];
+      [id, logicalClock, utcTimestamp, type, model, metadata];
 
   @override
   int compareTo(other) {
@@ -52,7 +49,7 @@ class SyncDiff extends Comparable with EquatableMixin {
     logicalClock = map['logicalClock'];
     utcTimestamp = map['utcTimestamp'];
     type = map['operationType'];
-    modelName = map['modelName'];
+    model = map['modelName'];
     metadata = map['operationMetadata'];
   }
 
@@ -62,7 +59,7 @@ class SyncDiff extends Comparable with EquatableMixin {
       'logicalClock': logicalClock,
       'utcTimestamp': utcTimestamp,
       'operationType': type,
-      'modelName': modelName,
+      'modelName': model,
       'operationMetadata': metadata,
     };
     return map;
@@ -75,7 +72,7 @@ class SyncDiff extends Comparable with EquatableMixin {
         'clock: $logicalClock,'
         'utcTimestamp: $utcTimestamp,'
         'opType: $type,'
-        'modelName: $modelName,'
+        'modelName: $model,'
         'operationMetadata: $metadata'
         '}';
   }
