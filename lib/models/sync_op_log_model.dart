@@ -41,16 +41,16 @@ class SyncDiff extends Comparable with EquatableMixin {
     assert(map.containsKey('id'));
     assert(map.containsKey('logicalClock'));
     assert(map.containsKey('utcTimestamp'));
-    assert(map.containsKey('operationType'));
-    assert(map.containsKey('modelName'));
-    assert(map.containsKey('operationMetadata'));
+    assert(map.containsKey('type'));
+    assert(map.containsKey('model'));
+    assert(map.containsKey('metadata'));
 
     id = map['id'];
     logicalClock = map['logicalClock'];
     utcTimestamp = map['utcTimestamp'];
-    type = map['operationType'];
-    model = map['modelName'];
-    metadata = map['operationMetadata'];
+    type = map['type'];
+    model = map['model'];
+    metadata = map['metadata'];
   }
 
   Map<String, dynamic> toMap() {
@@ -58,9 +58,9 @@ class SyncDiff extends Comparable with EquatableMixin {
       'id': id,
       'logicalClock': logicalClock,
       'utcTimestamp': utcTimestamp,
-      'operationType': type,
-      'modelName': model,
-      'operationMetadata': metadata,
+      'type': type,
+      'model': model,
+      'metadata': metadata,
     };
     return map;
   }
@@ -71,9 +71,9 @@ class SyncDiff extends Comparable with EquatableMixin {
         'id: $id,'
         'clock: $logicalClock,'
         'utcTimestamp: $utcTimestamp,'
-        'opType: $type,'
-        'modelName: $model,'
-        'operationMetadata: $metadata'
+        'type: $type,'
+        'model: $model,'
+        'metadata: $metadata'
         '}';
   }
 }
