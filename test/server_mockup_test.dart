@@ -18,7 +18,7 @@ void main() {
     ServerSyncResponse outputClient = await server.sync(
       owner: 'user1',
       clientLogicalClock: 0,
-      userSyncOperationList: [],
+      userSyncDiffs: [],
     );
     expect(outputClient.logicalClock, 0);
     expect(outputClient.diffs, []);
@@ -29,10 +29,10 @@ void main() {
       () async {
     final server = ServerMockup.instance;
 
-    List<SyncDiff> syncOperationList = [
+    List<SyncDiff> syncDiffs = [
       SyncDiff(
         logicalClock: 1,
-        timestamp: new DateTime.now()
+        utcTimestamp: new DateTime.now()
             .subtract(Duration(minutes: 2))
             .millisecondsSinceEpoch,
         operationType: CREATE_OPERATION,
@@ -41,7 +41,7 @@ void main() {
       ),
       SyncDiff(
         logicalClock: 1,
-        timestamp: new DateTime.now()
+        utcTimestamp: new DateTime.now()
             .subtract(Duration(minutes: 1))
             .millisecondsSinceEpoch,
         operationType: CREATE_OPERATION,
@@ -54,7 +54,7 @@ void main() {
     ServerSyncResponse outputClient1 = await server.sync(
       owner: 'user1',
       clientLogicalClock: 1,
-      userSyncOperationList: syncOperationList,
+      userSyncDiffs: syncDiffs,
     );
     expect(outputClient1.logicalClock, 2);
     expect(outputClient1.diffs, []);
@@ -63,7 +63,7 @@ void main() {
     ServerSyncResponse outputClient2 = await server.sync(
       owner: 'user2',
       clientLogicalClock: 0,
-      userSyncOperationList: [],
+      userSyncDiffs: [],
     );
     expect(outputClient2.logicalClock, 0);
     expect(outputClient2.diffs, []);
@@ -72,9 +72,9 @@ void main() {
     ServerSyncResponse outputClient3 = await server.sync(
       owner: 'user1',
       clientLogicalClock: 0,
-      userSyncOperationList: [],
+      userSyncDiffs: [],
     );
     expect(outputClient3.logicalClock, 2);
-    expect(outputClient3.diffs, syncOperationList);
+    expect(outputClient3.diffs, syncDiffs);
   });
 }

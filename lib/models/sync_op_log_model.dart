@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 class SyncDiff extends Comparable with EquatableMixin {
   SyncDiff({
     @required this.logicalClock,
-    @required this.timestamp,
+    @required this.utcTimestamp,
     @required this.operationType,
     @required this.modelName,
     @required this.operationMetadata,
@@ -14,14 +14,21 @@ class SyncDiff extends Comparable with EquatableMixin {
     this.id = id != null ? id : Uuid().v1();
   }
 
-  static final String tableName = 'MobyncSyncOperationsTable';
+  static final String tableName = 'MobyncSyncDiffsTable';
   String id;
   String operationType, modelName;
   Map operationMetadata;
-  int logicalClock, timestamp;
+  int logicalClock, utcTimestamp;
 
   @override
-  List<Object> get props => [id];
+  List<Object> get props => [
+        id,
+        logicalClock,
+        utcTimestamp,
+        operationType,
+        modelName,
+        operationMetadata
+      ];
 
   @override
   int compareTo(other) {
@@ -30,26 +37,26 @@ class SyncDiff extends Comparable with EquatableMixin {
     else if (this.logicalClock > other.logicalClock)
       return 1;
     else {
-      if (this.timestamp < other.timestamp)
+      if (this.utcTimestamp < other.utcTimestamp)
         return -1;
-      else if (this.timestamp > other.timestamp)
+      else if (this.utcTimestamp > other.utcTimestamp)
         return 1;
       else
         return 0;
     }
   }
 
-  fromMap(Map<String, dynamic> map) {
+  SyncDiff.fromMap(Map<String, dynamic> map) {
     assert(map.containsKey('id'));
     assert(map.containsKey('logicalClock'));
-    assert(map.containsKey('timestamp'));
+    assert(map.containsKey('utcTimestamp'));
     assert(map.containsKey('operationType'));
     assert(map.containsKey('modelName'));
     assert(map.containsKey('operationMetadata'));
 
     id = map['id'];
     logicalClock = map['logicalClock'];
-    timestamp = map['timestamp'];
+    utcTimestamp = map['utcTimestamp'];
     operationType = map['operationType'];
     modelName = map['modelName'];
     operationMetadata = map['operationMetadata'];
@@ -59,7 +66,7 @@ class SyncDiff extends Comparable with EquatableMixin {
     var map = <String, dynamic>{
       'id': id,
       'logicalClock': logicalClock,
-      'timestamp': timestamp,
+      'utcTimestamp': utcTimestamp,
       'operationType': operationType,
       'modelName': modelName,
       'operationMetadata': operationMetadata,
@@ -70,11 +77,12 @@ class SyncDiff extends Comparable with EquatableMixin {
   @override
   String toString() {
     return 'SyncDiff: {'
+        'id: $id,'
         'clock: $logicalClock,'
-        'timestamp: $timestamp,'
+        'utcTimestamp: $utcTimestamp,'
         'opType: $operationType,'
-        'odelName: $modelName,'
-        'perationMetadata: $operationMetadata'
+        'modelName: $modelName,'
+        'operationMetadata: $operationMetadata'
         '}';
   }
 }

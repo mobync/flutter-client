@@ -8,45 +8,47 @@ class MyMobyncClient extends MobyncClient {
   static final MyMobyncClient instance = MyMobyncClient._privateConstructor();
 
   Map<String, List> _data = {
-    'model1': [],
-    SyncMetaData.tableName: [],
-    SyncDiff.tableName: [],
+    'model1': <Map>[],
+    SyncMetaData.tableName: <Map>[],
+    SyncDiff.tableName: <Map>[],
   };
 
   @override
-  Future<void> createExecute(String where, Map what) {
-    for (int i = 0; i < _data[where].length; i++)
-      if (_data[where][i]['id'] == what['id']) {
+  Future<Map> createExecute(String model, Map metadata) {
+    for (int i = 0; i < _data[model].length; i++)
+      if (_data[model][i]['id'] == metadata['id']) {
         throw Exception('Id already exists!');
       }
 
-    _data[where].add(what);
+    _data[model].add(metadata);
+
+    return Future.value(_data[model][_data[model].length - 1]);
   }
 
   @override
-  Future<void> updateExecute(String where, Map what) {
-    for (int i = 0; i < _data[where].length; i++)
-      if (_data[where][i]['id'] == what['id']) {
-        what.forEach((key, value) {
-          _data[where][i][key] = value;
-        });
+  Future<Map> updateExecute(String model, Map metadata) {
+    for (int i = 0; i < _data[model].length; i++)
+      if (_data[model][i]['id'] == metadata['id']) {
+        _data[model][i].addAll(metadata);
+        return Future.value(_data[model][i]);
       }
+    return Future.value(null);
   }
 
   @override
-  Future<void> deleteExecute(String where, String id) {
+  Future<Map> deleteExecute(String model, String id) {
     var removedAt;
-    for (int i = 0; i < _data[where].length; i++)
-      if (_data[where][i]['id'] == id) {
-        removedAt = _data[where].removeAt(i);
+    for (int i = 0; i < _data[model].length; i++)
+      if (_data[model][i]['id'] == id) {
+        removedAt = _data[model].removeAt(i);
       }
 
-    if (removedAt == null) throw Exception('Element not found.');
+    return Future.value(removedAt);
   }
 
   @override
-  Future<List> readExecute(String where, {List<ReadFilter> filters}) {
-    List _filteredData = _data[where];
+  Future<List<Map>> readExecute(String model, {List<ReadFilter> filters}) {
+    List<Map> _filteredData = _data[model];
     if (filters != null)
       filters.forEach((filter) {
         switch (filter.filterBy) {

@@ -4,45 +4,55 @@ import 'package:mobync/constants/constants.dart';
 import 'package:mobync/models/models.dart';
 
 abstract class MobyncClient {
-  Future<void> createExecute(String where, Map what);
-  Future<void> updateExecute(String where, Map what);
-  Future<void> deleteExecute(String where, String uid);
-  Future<List> readExecute(String where, {List<ReadFilter> filters});
+  Future<Map> createExecute(String where, Map what);
+  Future<Map> updateExecute(String where, Map what);
+  Future<Map> deleteExecute(String where, String uid);
+  Future<List<Map>> readExecute(String where, {List<ReadFilter> filters});
 
-  Future<List> getSyncOperations({int logicalClock}) async {
+  Future<List<SyncDiff>> getSyncDiffs({int logicalClock}) async {
     if (logicalClock == null) logicalClock = await getLogicalClock();
-    return await readExecute(
+    List<Map> maps = await readExecute(
       SyncDiff.tableName,
       filters: [
         ReadFilter('logicalClock', FilterType.majorOrEqual, logicalClock)
       ],
     );
+    List<SyncDiff> diffs = maps.map((e) => SyncDiff.fromMap(e)).toList();
+    diffs.sort();
+    return diffs;
   }
 
   Future<int> getLogicalClock() async {
-    return await readExecute(SyncMetaData.tableName).then((value) {
-      return value.length > 0 ? value[0] : 0;
+    int logicalClock = await readExecute(SyncMetaData.tableName).then((value) {
+      return value.length > 0 ? value[0]['logicalClock'] : 0;
     });
+    return Future.value(logicalClock);
   }
 
   Future<void> setLogicalClock(int logicalClock) async {
-    await updateExecute(
+    Map updatedMetadata = await updateExecute(
       SyncMetaData.tableName,
       {'id': SyncMetaData.id, 'logicalClock': logicalClock},
     );
+
+    if (updatedMetadata == null)
+      await createExecute(
+        SyncMetaData.tableName,
+        {'id': SyncMetaData.id, 'logicalClock': logicalClock},
+      );
   }
 
-  Future<MobyncResponse> create(String where, Map what) async {
+  Future<MobyncResponse> create(String model, Map metadata) async {
     try {
-      await createExecute(where, what);
+      await createExecute(model, metadata);
       await createExecute(
           SyncDiff.tableName,
           SyncDiff(
             logicalClock: await getLogicalClock(),
-            timestamp: DateTime.now().millisecondsSinceEpoch,
+            utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
             operationType: CREATE_OPERATION,
-            modelName: where,
-            operationMetadata: what,
+            modelName: model,
+            operationMetadata: _shallowCopy(metadata),
           ).toMap());
 
       return Future.value(MobyncResponse(
@@ -57,17 +67,17 @@ abstract class MobyncClient {
     }
   }
 
-  Future<MobyncResponse> update(String where, Map what) async {
+  Future<MobyncResponse> update(String model, Map metadata) async {
     try {
-      await updateExecute(where, what);
+      await updateExecute(model, metadata);
       await createExecute(
           SyncDiff.tableName,
           SyncDiff(
             logicalClock: await getLogicalClock(),
-            timestamp: DateTime.now().millisecondsSinceEpoch,
+            utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
             operationType: UPDATE_OPERATION,
-            modelName: where,
-            operationMetadata: what,
+            modelName: model,
+            operationMetadata: metadata,
           ).toMap());
 
       return Future.value(MobyncResponse(
@@ -82,16 +92,16 @@ abstract class MobyncClient {
     }
   }
 
-  Future<MobyncResponse> delete(String where, String id) async {
+  Future<MobyncResponse> delete(String model, String id) async {
     try {
-      await deleteExecute(where, id);
+      await deleteExecute(model, id);
       await createExecute(
           SyncDiff.tableName,
           SyncDiff(
             logicalClock: await getLogicalClock(),
-            timestamp: DateTime.now().millisecondsSinceEpoch,
+            utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
             operationType: DELETE_OPERATION,
-            modelName: where,
+            modelName: model,
             operationMetadata: {'id': id},
           ).toMap());
 
@@ -107,12 +117,12 @@ abstract class MobyncClient {
     }
   }
 
-  Future<MobyncResponse> read(String where, {List<ReadFilter> filters}) async {
+  Future<MobyncResponse> read(String model, {List<ReadFilter> filters}) async {
     try {
-      List _filteredData = await readExecute(where, filters: filters);
+      List<Map> filteredData = await readExecute(model, filters: filters);
       return Future.value(MobyncResponse(
         success: true,
-        data: _filteredData,
+        data: filteredData,
       ));
     } catch (e) {
       return Future.value(MobyncResponse(
@@ -120,5 +130,13 @@ abstract class MobyncClient {
         message: e.toString(),
       ));
     }
+  }
+
+  Map _shallowCopy(Map obj) {
+    if (obj == null) return null;
+
+    Map res = {};
+    obj.forEach((key, value) => res[key] = value);
+    return res;
   }
 }
