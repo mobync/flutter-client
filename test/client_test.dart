@@ -58,7 +58,6 @@ void main() {
 
     /// SYNC DIFFS List
     List<SyncDiff> res8 = await client.getSyncDiffs();
-    expect(res8.length, 4);
     expect(
         res8.map((e) => [e.logicalClock, e.type, e.model, e.metadata]).toList(),
         [
@@ -162,5 +161,72 @@ void main() {
 
     logicalClock = await client.getLogicalClock();
     expect(logicalClock, 53);
+  });
+
+  test('test local diffs', () async {
+    final client = MyMobyncClient.instance;
+    MobyncResponse res1 = await client.read(SyncDiff.tableName);
+    expect(res1.success, true);
+    expect(
+        res1.data
+            .map((e) =>
+                [e['logicalClock'], e['type'], e['model'], e['metadata']])
+            .toList(),
+        [
+          [
+            10,
+            'CREATE',
+            'model1',
+            {'id': 'uuid1', 'campo1': 'abc'}
+          ],
+          [
+            10,
+            'CREATE',
+            'model1',
+            {'id': 'uuid2', 'campo1': 'fgh'}
+          ],
+          [
+            10,
+            'UPDATE',
+            'model1',
+            {'id': 'uuid1', 'campo1': 'xxx'}
+          ],
+          [
+            10,
+            'DELETE',
+            'model1',
+            {'id': 'uuid2'}
+          ],
+          [
+            51,
+            'CREATE',
+            'model1',
+            {'id': 'uuid3', 'campo1': 'a'}
+          ],
+          [
+            51,
+            'UPDATE',
+            'model1',
+            {'id': 'uuid3', 'campo1': 'b'}
+          ],
+          [
+            51,
+            'CREATE',
+            'model1',
+            {'id': 'uuid4', 'campo1': 'c'}
+          ],
+          [
+            51,
+            'DELETE',
+            'model1',
+            {'id': 'uuid3'}
+          ],
+          [
+            52,
+            'CREATE',
+            'model1',
+            {'id': 'uuid5', 'campo1': 'abc'}
+          ]
+        ]);
   });
 }
