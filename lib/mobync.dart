@@ -146,7 +146,7 @@ abstract class MobyncClient {
     ServerSyncResponse upstream =
         await fetchUpstreamData(logicalClock, localDiffs);
 
-    _setLogicalClock(upstream.logicalClock);
+    _setLogicalClock(upstream.logicalClock + 1);
     if (upstream.diffs.length > 0) executeSyncDiffs(upstream.diffs);
   }
 

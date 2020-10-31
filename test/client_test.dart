@@ -82,11 +82,10 @@ void main() {
     ServerSyncResponse upstreamResponse;
     int logicalClock;
 
-    localDiffs = await client.getSyncDiffs();
+    await client.synchronize();
 
     logicalClock = await client.getLogicalClock();
-    upstreamResponse = await server.syncEndpoint(logicalClock, localDiffs);
-    expect(upstreamResponse.diffs.length, 0);
+    expect(logicalClock, 2);
 
     List<SyncDiff> otherClientDiffsMockup = [
       SyncDiff(
@@ -147,7 +146,7 @@ void main() {
     ]);
 
     logicalClock = await client.getLogicalClock();
-    expect(logicalClock, 53);
+    expect(logicalClock, 54);
   });
 
   test('test local diffs', () async {

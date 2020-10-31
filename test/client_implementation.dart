@@ -33,7 +33,7 @@ class ServerMockup {
         .where((e) => e.logicalClock > userLogicalClock + 1)
         .toList();
 
-    mergeDiffs(userLogicalClock, userDiffs);
+    if (userDiffs.length > 0) mergeDiffs(userLogicalClock, userDiffs);
 
     return Future.value(ServerSyncResponse(serverLogicalClock, diffs));
   }
