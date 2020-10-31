@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobync/constants/constants.dart';
 import 'package:mobync/models/models.dart';
@@ -157,5 +159,8 @@ void main() {
       {'id': 'uuid4', 'campo1': 'c'},
       {'id': 'uuid5', 'campo1': 'abc'},
     ]);
+
+    logicalClock = await client.getLogicalClock();
+    expect(logicalClock, 53);
   });
 }

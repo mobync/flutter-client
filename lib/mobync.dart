@@ -11,7 +11,8 @@ abstract class MobyncClient {
   Future<List<Map>> readExecute(String where, {List<ReadFilter> filters});
 
   /// Note: it may handle proper auth when fetching upstream data.
-  Future<ServerSyncResponse> fetchUpstreamData(List<SyncDiff> localDiffs);
+  Future<ServerSyncResponse> fetchUpstreamData(
+      int logicalClock, List<SyncDiff> localDiffs);
 
   Future<List<SyncDiff>> getSyncDiffs({int logicalClock}) async {
     if (logicalClock == null) logicalClock = await getLogicalClock();
@@ -140,12 +141,13 @@ abstract class MobyncClient {
   }
 
   Future<void> synchronize() async {
+    int logicalClock = await getLogicalClock();
     List<SyncDiff> localDiffs = await getSyncDiffs();
-    ServerSyncResponse upstreamResponse = await fetchUpstreamData(localDiffs);
+    ServerSyncResponse upstream =
+        await fetchUpstreamData(logicalClock, localDiffs);
 
-    setLogicalClock(upstreamResponse.logicalClock);
-    if (upstreamResponse.diffs.length > 0)
-      executeSyncDiffs(upstreamResponse.diffs);
+    setLogicalClock(upstream.logicalClock);
+    if (upstream.diffs.length > 0) executeSyncDiffs(upstream.diffs);
   }
 
   Future<void> executeSyncDiffs(List<SyncDiff> diffs) async {

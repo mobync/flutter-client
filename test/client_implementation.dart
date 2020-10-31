@@ -122,8 +122,7 @@ class MyMobyncClient extends MobyncClient {
   }
 
   Future<ServerSyncResponse> fetchUpstreamData(
-      List<SyncDiff> localDiffs) async {
-    int logicalClock = await getLogicalClock();
+      int logicalClock, List<SyncDiff> localDiffs) async {
     ServerMockup instance = ServerMockup.instance;
     ServerSyncResponse res =
         await instance.syncEndpoint(logicalClock, localDiffs);
