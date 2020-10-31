@@ -10,8 +10,8 @@ abstract class MobyncClient {
   Future<Map> deleteExecute(String where, String uid);
   Future<List<Map>> readExecute(String where, {List<ReadFilter> filters});
 
-  /// Note: it may handle proper auth on upstream diffs fetch.
-  Future<List<SyncDiff>> fetchUpstreamDiffs(List<SyncDiff> localDiffs);
+  /// Note: it may handle proper auth when fetching upstream data.
+  Future<ServerSyncResponse> fetchUpstreamData(List<SyncDiff> localDiffs);
 
   Future<List<SyncDiff>> getSyncDiffs({int logicalClock}) async {
     if (logicalClock == null) logicalClock = await getLogicalClock();
@@ -139,11 +139,13 @@ abstract class MobyncClient {
     }
   }
 
-  Future<void> sync() async {
+  Future<void> synchronize() async {
     List<SyncDiff> localDiffs = await getSyncDiffs();
-    List<SyncDiff> upstreamDiffs = await fetchUpstreamDiffs(localDiffs);
-    upstreamDiffs.sort();
-    executeSyncDiffs(upstreamDiffs);
+    ServerSyncResponse upstreamResponse = await fetchUpstreamData(localDiffs);
+
+    setLogicalClock(upstreamResponse.logicalClock);
+    if (upstreamResponse.diffs.length > 0)
+      executeSyncDiffs(upstreamResponse.diffs);
   }
 
   Future<void> executeSyncDiffs(List<SyncDiff> diffs) async {
@@ -155,7 +157,7 @@ abstract class MobyncClient {
           res = await createExecute(el.model, metadata);
           break;
         case UPDATE_OPERATION:
-          res = await createExecute(el.model, metadata);
+          res = await updateExecute(el.model, metadata);
           break;
         case DELETE_OPERATION:
           res = await deleteExecute(el.model, metadata['id']);

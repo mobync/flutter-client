@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:mobync/mobync.dart';
 import 'package:mobync/constants/constants.dart';
 import 'package:mobync/models/meta_sync_model.dart';
@@ -7,10 +9,33 @@ class ServerMockup {
   ServerMockup._privateConstructor();
   static final ServerMockup instance = ServerMockup._privateConstructor();
 
-  List<SyncDiff> data = [];
+  List<SyncDiff> serverDiffs = [];
+  int serverLogicalClock = 0;
 
-  Future<List<SyncDiff>> syncEndpoint(List<SyncDiff> userDiffs) {
-    return Future.value(data);
+  void mergeDiffs(
+    int userLogicalClock,
+    List<SyncDiff> userDiffs,
+  ) {
+    serverLogicalClock = max(serverLogicalClock, userLogicalClock) + 1;
+
+    userDiffs.forEach((e) {
+      e.logicalClock = serverLogicalClock;
+      serverDiffs.add(e);
+    });
+    serverDiffs.sort();
+  }
+
+  Future<ServerSyncResponse> syncEndpoint(
+    int userLogicalClock,
+    List<SyncDiff> userDiffs,
+  ) {
+    var diffs = serverDiffs
+        .where((e) => e.logicalClock > userLogicalClock + 1)
+        .toList();
+
+    mergeDiffs(userLogicalClock, userDiffs);
+
+    return Future.value(ServerSyncResponse(serverLogicalClock, diffs));
   }
 }
 
@@ -96,9 +121,12 @@ class MyMobyncClient extends MobyncClient {
     return Future.value(_filteredData);
   }
 
-  Future<List<SyncDiff>> fetchUpstreamDiffs(List<SyncDiff> localDiffs) async {
+  Future<ServerSyncResponse> fetchUpstreamData(
+      List<SyncDiff> localDiffs) async {
+    int logicalClock = await getLogicalClock();
     ServerMockup instance = ServerMockup.instance;
-    List<SyncDiff> upstreamDiffs = await instance.syncEndpoint(localDiffs);
-    return Future.value(upstreamDiffs);
+    ServerSyncResponse res =
+        await instance.syncEndpoint(logicalClock, localDiffs);
+    return Future.value(res);
   }
 }
