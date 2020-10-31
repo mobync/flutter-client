@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobync/constants/constants.dart';
 import 'package:mobync/models/models.dart';
@@ -8,17 +6,6 @@ import 'package:uuid/uuid.dart';
 import 'client_implementation.dart';
 
 void main() {
-  test('test logical clock get and set', () async {
-    final client = MyMobyncClient.instance;
-
-    int logicalClock = await client.getLogicalClock();
-    expect(logicalClock, 0);
-
-    await client.setLogicalClock(10);
-    int logicalClock2 = await client.getLogicalClock();
-    expect(logicalClock2, 10);
-  });
-
   test('test diffs for sequence of local operations', () async {
     final client = MyMobyncClient.instance;
 
@@ -62,25 +49,25 @@ void main() {
         res8.map((e) => [e.logicalClock, e.type, e.model, e.metadata]).toList(),
         [
           [
-            10,
+            0,
             'CREATE',
             'model1',
             {'id': 'uuid1', 'campo1': 'abc'}
           ],
           [
-            10,
+            0,
             'CREATE',
             'model1',
             {'id': 'uuid2', 'campo1': 'fgh'}
           ],
           [
-            10,
+            0,
             'UPDATE',
             'model1',
             {'id': 'uuid1', 'campo1': 'xxx'}
           ],
           [
-            10,
+            0,
             'DELETE',
             'model1',
             {'id': 'uuid2'}
@@ -174,25 +161,25 @@ void main() {
             .toList(),
         [
           [
-            10,
+            0,
             'CREATE',
             'model1',
             {'id': 'uuid1', 'campo1': 'abc'}
           ],
           [
-            10,
+            0,
             'CREATE',
             'model1',
             {'id': 'uuid2', 'campo1': 'fgh'}
           ],
           [
-            10,
+            0,
             'UPDATE',
             'model1',
             {'id': 'uuid1', 'campo1': 'xxx'}
           ],
           [
-            10,
+            0,
             'DELETE',
             'model1',
             {'id': 'uuid2'}

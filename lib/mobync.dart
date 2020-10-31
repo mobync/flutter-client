@@ -5,17 +5,17 @@ import 'package:mobync/models/models.dart';
 import 'package:uuid/uuid.dart';
 
 abstract class MobyncClient {
-  Future<Map> createExecute(String where, Map what);
-  Future<Map> updateExecute(String where, Map what);
-  Future<Map> deleteExecute(String where, String uid);
-  Future<List<Map>> readExecute(String where, {List<ReadFilter> filters});
+  Future<Map> createExecute(String model, Map metadata);
+  Future<Map> updateExecute(String model, Map metadata);
+  Future<Map> deleteExecute(String model, String id);
+  Future<List<Map>> readExecute(String model, {List<ReadFilter> filters});
 
   /// Note: it may handle proper auth when fetching upstream data.
   Future<ServerSyncResponse> fetchUpstreamData(
       int logicalClock, List<SyncDiff> localDiffs);
 
-  Future<List<SyncDiff>> getSyncDiffs({int logicalClock}) async {
-    if (logicalClock == null) logicalClock = await getLogicalClock();
+  Future<List<SyncDiff>> getSyncDiffs() async {
+    int logicalClock = await getLogicalClock();
     List<Map> maps = await readExecute(
       SyncDiff.tableName,
       filters: [
@@ -34,7 +34,7 @@ abstract class MobyncClient {
     return Future.value(logicalClock);
   }
 
-  Future<void> setLogicalClock(int logicalClock) async {
+  Future<void> _setLogicalClock(int logicalClock) async {
     Map updatedMetadata = await updateExecute(
       SyncMetaData.tableName,
       {'id': SyncMetaData.id, 'logicalClock': logicalClock},
@@ -146,7 +146,7 @@ abstract class MobyncClient {
     ServerSyncResponse upstream =
         await fetchUpstreamData(logicalClock, localDiffs);
 
-    setLogicalClock(upstream.logicalClock);
+    _setLogicalClock(upstream.logicalClock);
     if (upstream.diffs.length > 0) executeSyncDiffs(upstream.diffs);
   }
 
