@@ -22,7 +22,7 @@ void main() {
     expect(res1.success, true);
     expect(res1.data, []);
 
-    MobyncResponse res2 = await client1.read('model1');
+    MobyncResponse res2 = await client2.read('model1');
     expect(res2.success, true);
     expect(res2.data, []);
   });
@@ -54,7 +54,7 @@ void main() {
     expect(res2.success, true);
   });
 
-  test('client2 synchonizes', () async {
+  test('client 2 synchonizes', () async {
     await client2.synchronize();
 
     MobyncResponse res = await client2.read('model1');
@@ -68,7 +68,7 @@ void main() {
     expect(logicalClock2, 3);
   });
 
-  test('client1 synchronizes', () async {
+  test('client 1 synchronizes', () async {
     await client1.synchronize();
 
     MobyncResponse res = await client1.read('model1');
@@ -83,7 +83,7 @@ void main() {
     expect(logicalClock1, 4);
   });
 
-  test('client2 synchronizes', () async {
+  test('client 2 synchronizes', () async {
     await client2.synchronize();
 
     MobyncResponse res = await client2.read('model1');
@@ -96,5 +96,30 @@ void main() {
 
     int logicalClock1 = await client1.getLogicalClock();
     expect(logicalClock1, 4);
+  });
+
+  test('client 2 updates client 1 object and client 1 and 2 synchronizes', () async {
+    final obj = {'id': 'uuid1', 'campo1': 'x'};
+    MobyncResponse res = await client1.update('model1', obj);
+    expect(res.success, true);
+
+    await client1.synchronize();
+    await client2.synchronize();
+
+    MobyncResponse res1 = await client1.read('model1');
+    expect(res1.success, true);
+    expect(res1.data, [
+      {'id': 'uuid1', 'campo1': 'x'},
+      {'id': 'uuid2', 'campo1': 'b'},
+      {'id': 'uuid3', 'campo1': 'c'},
+    ]);
+
+    MobyncResponse res2 = await client2.read('model1');
+    expect(res2.success, true);
+    expect(res2.data, [
+      {'id': 'uuid1', 'campo1': 'x'},
+      {'id': 'uuid2', 'campo1': 'b'},
+      {'id': 'uuid3', 'campo1': 'c'},
+    ]);
   });
 }
