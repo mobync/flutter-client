@@ -9,6 +9,7 @@ void main() {
   setUpAll(() async {
     client1 = MyMobyncClient();
     client2 = MyMobyncClient();
+    ServerMockup.instance.reset();
   });
 
   test('client 1 and 2 sanity check', () async {
@@ -44,7 +45,7 @@ void main() {
     ]);
   });
 
-  test('client 1 and 2 create local objects and doesnt synchronize', () async {
+  test('client 1 and 2 create local objects but neither synchronize', () async {
     final obj1 = {'id': 'uuid2', 'campo1': 'b'};
     MobyncResponse res1 = await client1.create('model1', obj1);
     expect(res1.success, true);
@@ -98,13 +99,13 @@ void main() {
     expect(logicalClock1, 4);
   });
 
-  test('client 2 updates client 1 object and client 1 and 2 synchronizes', () async {
+  test('client 2 updates client 1 object and both synchronizes', () async {
     final obj = {'id': 'uuid1', 'campo1': 'x'};
-    MobyncResponse res = await client1.update('model1', obj);
+    MobyncResponse res = await client2.update('model1', obj);
     expect(res.success, true);
 
-    await client1.synchronize();
     await client2.synchronize();
+    await client1.synchronize();
 
     MobyncResponse res1 = await client1.read('model1');
     expect(res1.success, true);
@@ -120,6 +121,28 @@ void main() {
       {'id': 'uuid1', 'campo1': 'x'},
       {'id': 'uuid2', 'campo1': 'b'},
       {'id': 'uuid3', 'campo1': 'c'},
+    ]);
+  });
+
+  test('client 1 deletes client 2 object and both synchronizes', () async {
+    MobyncResponse res = await client1.delete('model1', 'uuid3');
+    expect(res.success, true);
+
+    await client1.synchronize();
+    await client2.synchronize();
+
+    MobyncResponse res1 = await client1.read('model1');
+    expect(res1.success, true);
+    expect(res1.data, [
+      {'id': 'uuid1', 'campo1': 'x'},
+      {'id': 'uuid2', 'campo1': 'b'},
+    ]);
+
+    MobyncResponse res2 = await client2.read('model1');
+    expect(res2.success, true);
+    expect(res2.data, [
+      {'id': 'uuid1', 'campo1': 'x'},
+      {'id': 'uuid2', 'campo1': 'b'},
     ]);
   });
 }

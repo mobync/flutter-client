@@ -36,12 +36,14 @@ class ServerMockup {
 
     return Future.value(ServerSyncResponse(serverLogicalClock, diffs));
   }
+
+  void reset(){
+    serverDiffs = [];
+    serverLogicalClock = 0;
+  }
 }
 
 class MyMobyncClient extends MobyncClient {
-//  MyMobyncClient._privateConstructor();
-//  static final MyMobyncClient instance = MyMobyncClient._privateConstructor();
-
   Map<String, List> _data = {
     'model1': <Map>[],
     SyncMetaData.tableName: <Map>[],
@@ -64,7 +66,9 @@ class MyMobyncClient extends MobyncClient {
   Future<Map> commitLocalUpdate(String model, Map metadata) {
     for (int i = 0; i < _data[model].length; i++)
       if (_data[model][i]['id'] == metadata['id']) {
-        _data[model][i].addAll(metadata);
+        metadata.forEach((key, value) {
+          _data[model][i][key] = value;
+        });
         return Future.value(_data[model][i]);
       }
     return Future.value(null);

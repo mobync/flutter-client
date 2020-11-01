@@ -10,6 +10,7 @@ void main() {
 
   setUpAll(() async {
     client = MyMobyncClient();
+    ServerMockup.instance.reset();
   });
 
   test('test diffs for sequence of local operations', () async {
@@ -94,28 +95,36 @@ void main() {
       SyncDiff(
           id: Uuid().v1(),
           logicalClock: 50,
-          utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
+          utcTimestamp: (DateTime.now().subtract(Duration(minutes: 4)))
+              .toUtc()
+              .millisecondsSinceEpoch,
           type: CREATE_OPERATION,
           model: 'model1',
           metadata: {'id': 'uuid3', 'campo1': 'a'}),
       SyncDiff(
           id: Uuid().v1(),
           logicalClock: 50,
-          utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
+          utcTimestamp: (DateTime.now().subtract(Duration(minutes: 3)))
+              .toUtc()
+              .millisecondsSinceEpoch,
           type: UPDATE_OPERATION,
           model: 'model1',
           metadata: {'id': 'uuid3', 'campo1': 'b'}),
       SyncDiff(
           id: Uuid().v1(),
           logicalClock: 50,
-          utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
+          utcTimestamp: (DateTime.now().subtract(Duration(minutes: 2)))
+              .toUtc()
+              .millisecondsSinceEpoch,
           type: CREATE_OPERATION,
           model: 'model1',
           metadata: {'id': 'uuid4', 'campo1': 'c'}),
       SyncDiff(
           id: Uuid().v1(),
           logicalClock: 50,
-          utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
+          utcTimestamp: (DateTime.now().subtract(Duration(minutes: 1)))
+              .toUtc()
+              .millisecondsSinceEpoch,
           type: DELETE_OPERATION,
           model: 'model1',
           metadata: {'id': 'uuid3'})
@@ -153,13 +162,9 @@ void main() {
   });
 
   test('test local diffs', () async {
-    MobyncResponse res1 = await client.read(SyncDiff.tableName);
-    expect(res1.success, true);
+    List<SyncDiff> res = await client.getSyncDiffs(logicalClock: 0);
     expect(
-        res1.data
-            .map((e) =>
-                [e['logicalClock'], e['type'], e['model'], e['metadata']])
-            .toList(),
+        res.map((e) => [e.logicalClock, e.type, e.model, e.metadata]).toList(),
         [
           [
             0,
