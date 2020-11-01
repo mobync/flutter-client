@@ -29,9 +29,8 @@ class ServerMockup {
     int userLogicalClock,
     List<SyncDiff> userDiffs,
   ) {
-    var diffs = serverDiffs
-        .where((e) => e.logicalClock > userLogicalClock + 1)
-        .toList();
+    var diffs =
+        serverDiffs.where((e) => e.logicalClock >= userLogicalClock).toList();
 
     if (userDiffs.length > 0) mergeDiffs(userLogicalClock, userDiffs);
 
@@ -40,8 +39,8 @@ class ServerMockup {
 }
 
 class MyMobyncClient extends MobyncClient {
-  MyMobyncClient._privateConstructor();
-  static final MyMobyncClient instance = MyMobyncClient._privateConstructor();
+//  MyMobyncClient._privateConstructor();
+//  static final MyMobyncClient instance = MyMobyncClient._privateConstructor();
 
   Map<String, List> _data = {
     'model1': <Map>[],
@@ -117,6 +116,8 @@ class MyMobyncClient extends MobyncClient {
             break;
         }
       });
+
+    _filteredData.sort((a, b) => (a['id'] as String).compareTo(b['id']));
 
     return Future.value(_filteredData);
   }

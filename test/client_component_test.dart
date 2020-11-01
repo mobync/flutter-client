@@ -6,9 +6,13 @@ import 'package:uuid/uuid.dart';
 import 'client_implementation.dart';
 
 void main() {
-  test('test diffs for sequence of local operations', () async {
-    final client = MyMobyncClient.instance;
+  MyMobyncClient client;
 
+  setUpAll(() async {
+    client = MyMobyncClient();
+  });
+
+  test('test diffs for sequence of local operations', () async {
     /// CREATE Operation
     final obj1 = {'id': 'uuid1', 'campo1': 'abc'};
     MobyncResponse res1 = await client.create('model1', obj1);
@@ -76,7 +80,6 @@ void main() {
   });
 
   test('test upstream diffs fetch', () async {
-    final client = MyMobyncClient.instance;
     ServerMockup server = ServerMockup.instance;
     List<SyncDiff> localDiffs, upstreamDiffs;
     ServerSyncResponse upstreamResponse;
@@ -150,7 +153,6 @@ void main() {
   });
 
   test('test local diffs', () async {
-    final client = MyMobyncClient.instance;
     MobyncResponse res1 = await client.read(SyncDiff.tableName);
     expect(res1.success, true);
     expect(
