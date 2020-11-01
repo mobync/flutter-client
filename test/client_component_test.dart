@@ -30,27 +30,27 @@ void main() {
 
   test('Client 1 perform multiple operations and creates its local sync diffs',
       () async {
-    final obj1 = {'id': 'uuid1', 'campo1': 'abc'};
+    final obj1 = {'id': 'uuid1', 'field1': 'abc'};
     MobyncResponse res1 = await client1.create('model1', obj1);
     expect(res1.success, true);
 
-    final obj2 = {'id': 'uuid1', 'campo1': 'cde'};
+    final obj2 = {'id': 'uuid1', 'field1': 'cde'};
     MobyncResponse res2 = await client1.create('model1', obj2);
     expect(res2.success, false);
 
-    final obj3 = {'id': 'uuid2', 'campo1': 'fgh'};
+    final obj3 = {'id': 'uuid2', 'field1': 'fgh'};
     MobyncResponse res3 = await client1.create('model1', obj3);
     expect(res3.success, true);
 
-    final obj4 = {'id': 'uuid1', 'campo1': 'xxx'};
+    final obj4 = {'id': 'uuid1', 'field1': 'xxx'};
     MobyncResponse res4 = await client1.update('model1', obj4);
     expect(res4.success, true);
 
     MobyncResponse res5 = await client1.read('model1');
     expect(res5.success, true);
     expect(res5.data, [
-      {'id': 'uuid1', 'campo1': 'xxx'},
-      {'id': 'uuid2', 'campo1': 'fgh'}
+      {'id': 'uuid1', 'field1': 'xxx'},
+      {'id': 'uuid2', 'field1': 'fgh'}
     ]);
 
     MobyncResponse res6 = await client1.delete('model1', 'uuid2');
@@ -59,7 +59,7 @@ void main() {
     MobyncResponse res7 = await client1.read('model1');
     expect(res7.success, true);
     expect(res7.data, [
-      {'id': 'uuid1', 'campo1': 'xxx'}
+      {'id': 'uuid1', 'field1': 'xxx'}
     ]);
 
     List<SyncDiff> res8 = await client1.getSyncDiffs();
@@ -76,19 +76,19 @@ void main() {
             0,
             'create',
             'model1',
-            {'id': 'uuid1', 'campo1': 'abc'}
+            {'id': 'uuid1', 'field1': 'abc'}
           ],
           [
             0,
             'create',
             'model1',
-            {'id': 'uuid2', 'campo1': 'fgh'}
+            {'id': 'uuid2', 'field1': 'fgh'}
           ],
           [
             0,
             'update',
             'model1',
-            {'id': 'uuid1', 'campo1': 'xxx'}
+            {'id': 'uuid1', 'field1': 'xxx'}
           ],
           [
             0,
@@ -106,12 +106,12 @@ void main() {
     MobyncResponse res1 = await client1.read('model1');
     expect(res1.success, true);
     expect(res1.data, [
-      {'id': 'uuid1', 'campo1': 'xxx'}
+      {'id': 'uuid1', 'field1': 'xxx'}
     ]);
     MobyncResponse res2 = await client2.read('model1');
     expect(res2.success, true);
     expect(res2.data, [
-      {'id': 'uuid1', 'campo1': 'xxx'}
+      {'id': 'uuid1', 'field1': 'xxx'}
     ]);
   });
 

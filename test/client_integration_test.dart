@@ -29,7 +29,7 @@ void main() {
   });
 
   test('client 1 creates local object and synchronizes', () async {
-    final obj1 = {'id': 'uuid1', 'campo1': 'a'};
+    final obj1 = {'id': 'uuid1', 'field1': 'a'};
     MobyncResponse res1 = await client1.create('model1', obj1);
     expect(res1.success, true);
 
@@ -41,16 +41,16 @@ void main() {
     MobyncResponse res = await client1.read('model1');
     expect(res.success, true);
     expect(res.data, [
-      {'id': 'uuid1', 'campo1': 'a'},
+      {'id': 'uuid1', 'field1': 'a'},
     ]);
   });
 
   test('client 1 and 2 create local objects but neither synchronize', () async {
-    final obj1 = {'id': 'uuid2', 'campo1': 'b'};
+    final obj1 = {'id': 'uuid2', 'field1': 'b'};
     MobyncResponse res1 = await client1.create('model1', obj1);
     expect(res1.success, true);
 
-    final obj2 = {'id': 'uuid3', 'campo1': 'c'};
+    final obj2 = {'id': 'uuid3', 'field1': 'c'};
     MobyncResponse res2 = await client2.create('model1', obj2);
     expect(res2.success, true);
   });
@@ -61,8 +61,8 @@ void main() {
     MobyncResponse res = await client2.read('model1');
     expect(res.success, true);
     expect(res.data, [
-      {'id': 'uuid1', 'campo1': 'a'},
-      {'id': 'uuid3', 'campo1': 'c'},
+      {'id': 'uuid1', 'field1': 'a'},
+      {'id': 'uuid3', 'field1': 'c'},
     ]);
 
     int logicalClock2 = await client2.getLogicalClock();
@@ -75,9 +75,9 @@ void main() {
     MobyncResponse res = await client1.read('model1');
     expect(res.success, true);
     expect(res.data, [
-      {'id': 'uuid1', 'campo1': 'a'},
-      {'id': 'uuid2', 'campo1': 'b'},
-      {'id': 'uuid3', 'campo1': 'c'},
+      {'id': 'uuid1', 'field1': 'a'},
+      {'id': 'uuid2', 'field1': 'b'},
+      {'id': 'uuid3', 'field1': 'c'},
     ]);
 
     int logicalClock1 = await client1.getLogicalClock();
@@ -90,9 +90,9 @@ void main() {
     MobyncResponse res = await client2.read('model1');
     expect(res.success, true);
     expect(res.data, [
-      {'id': 'uuid1', 'campo1': 'a'},
-      {'id': 'uuid2', 'campo1': 'b'},
-      {'id': 'uuid3', 'campo1': 'c'},
+      {'id': 'uuid1', 'field1': 'a'},
+      {'id': 'uuid2', 'field1': 'b'},
+      {'id': 'uuid3', 'field1': 'c'},
     ]);
 
     int logicalClock1 = await client1.getLogicalClock();
@@ -100,7 +100,7 @@ void main() {
   });
 
   test('client 2 updates client 1 object and both synchronizes', () async {
-    final obj = {'id': 'uuid1', 'campo1': 'x'};
+    final obj = {'id': 'uuid1', 'field1': 'x'};
     MobyncResponse res = await client2.update('model1', obj);
     expect(res.success, true);
 
@@ -110,17 +110,17 @@ void main() {
     MobyncResponse res1 = await client1.read('model1');
     expect(res1.success, true);
     expect(res1.data, [
-      {'id': 'uuid1', 'campo1': 'x'},
-      {'id': 'uuid2', 'campo1': 'b'},
-      {'id': 'uuid3', 'campo1': 'c'},
+      {'id': 'uuid1', 'field1': 'x'},
+      {'id': 'uuid2', 'field1': 'b'},
+      {'id': 'uuid3', 'field1': 'c'},
     ]);
 
     MobyncResponse res2 = await client2.read('model1');
     expect(res2.success, true);
     expect(res2.data, [
-      {'id': 'uuid1', 'campo1': 'x'},
-      {'id': 'uuid2', 'campo1': 'b'},
-      {'id': 'uuid3', 'campo1': 'c'},
+      {'id': 'uuid1', 'field1': 'x'},
+      {'id': 'uuid2', 'field1': 'b'},
+      {'id': 'uuid3', 'field1': 'c'},
     ]);
   });
 
@@ -134,15 +134,15 @@ void main() {
     MobyncResponse res1 = await client1.read('model1');
     expect(res1.success, true);
     expect(res1.data, [
-      {'id': 'uuid1', 'campo1': 'x'},
-      {'id': 'uuid2', 'campo1': 'b'},
+      {'id': 'uuid1', 'field1': 'x'},
+      {'id': 'uuid2', 'field1': 'b'},
     ]);
 
     MobyncResponse res2 = await client2.read('model1');
     expect(res2.success, true);
     expect(res2.data, [
-      {'id': 'uuid1', 'campo1': 'x'},
-      {'id': 'uuid2', 'campo1': 'b'},
+      {'id': 'uuid1', 'field1': 'x'},
+      {'id': 'uuid2', 'field1': 'b'},
     ]);
   });
 }
