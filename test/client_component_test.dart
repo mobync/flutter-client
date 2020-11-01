@@ -103,9 +103,14 @@ void main() {
     await client1.synchronize();
     await client2.synchronize();
 
-    MobyncResponse res = await client2.read('model1');
-    expect(res.success, true);
-    expect(res.data, [
+    MobyncResponse res1 = await client1.read('model1');
+    expect(res1.success, true);
+    expect(res1.data, [
+      {'id': 'uuid1', 'campo1': 'xxx'}
+    ]);
+    MobyncResponse res2 = await client2.read('model1');
+    expect(res2.success, true);
+    expect(res2.data, [
       {'id': 'uuid1', 'campo1': 'xxx'}
     ]);
   });
