@@ -15,7 +15,7 @@ abstract class MobyncClient {
       int logicalClock, List<SyncDiff> localDiffs);
 
   Future<List<SyncDiff>> getSyncDiffs({logicalClock}) async {
-    if(logicalClock == null) logicalClock = await getLogicalClock();
+    if (logicalClock == null) logicalClock = await getLogicalClock();
     List<Map> maps = await executeLocalRead(
       SyncDiff.tableName,
       filters: [

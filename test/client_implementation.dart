@@ -37,7 +37,7 @@ class ServerMockup {
     return Future.value(ServerSyncResponse(serverLogicalClock, diffs));
   }
 
-  void reset(){
+  void reset() {
     serverDiffs = [];
     serverLogicalClock = 0;
   }

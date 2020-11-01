@@ -1,9 +1,8 @@
 import 'dart:convert';
 
-import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 
-class MobyncResponse extends Equatable {
+class MobyncResponse {
   MobyncResponse({
     @required this.success,
     this.message,
@@ -13,9 +12,6 @@ class MobyncResponse extends Equatable {
   final bool success;
   final String message;
   final List data;
-
-  @override
-  List<Object> get props => [success, message, data];
 
   @override
   String toString() {
