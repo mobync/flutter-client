@@ -50,7 +50,7 @@ class MyMobyncClient extends MobyncClient {
   };
 
   @override
-  Future<Map> createExecute(String model, Map metadata) {
+  Future<Map> commitLocalCreate(String model, Map metadata) {
     for (int i = 0; i < _data[model].length; i++)
       if (_data[model][i]['id'] == metadata['id']) {
         throw Exception('Id already exists!');
@@ -62,7 +62,7 @@ class MyMobyncClient extends MobyncClient {
   }
 
   @override
-  Future<Map> updateExecute(String model, Map metadata) {
+  Future<Map> commitLocalUpdate(String model, Map metadata) {
     for (int i = 0; i < _data[model].length; i++)
       if (_data[model][i]['id'] == metadata['id']) {
         _data[model][i].addAll(metadata);
@@ -72,7 +72,7 @@ class MyMobyncClient extends MobyncClient {
   }
 
   @override
-  Future<Map> deleteExecute(String model, String id) {
+  Future<Map> commitLocalDelete(String model, String id) {
     var removedAt;
     for (int i = 0; i < _data[model].length; i++)
       if (_data[model][i]['id'] == id) {
@@ -83,7 +83,7 @@ class MyMobyncClient extends MobyncClient {
   }
 
   @override
-  Future<List<Map>> readExecute(String model, {List<ReadFilter> filters}) {
+  Future<List<Map>> executeLocalRead(String model, {List<ReadFilter> filters}) {
     List<Map> _filteredData = _data[model];
     if (filters != null)
       filters.forEach((filter) {
@@ -121,7 +121,7 @@ class MyMobyncClient extends MobyncClient {
     return Future.value(_filteredData);
   }
 
-  Future<ServerSyncResponse> fetchUpstreamData(
+  Future<ServerSyncResponse> postSyncEndpoint(
       int logicalClock, List<SyncDiff> localDiffs) async {
     ServerMockup instance = ServerMockup.instance;
     ServerSyncResponse res =

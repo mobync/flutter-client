@@ -5,18 +5,18 @@ import 'package:mobync/models/models.dart';
 import 'package:uuid/uuid.dart';
 
 abstract class MobyncClient {
-  Future<Map> createExecute(String model, Map metadata);
-  Future<Map> updateExecute(String model, Map metadata);
-  Future<Map> deleteExecute(String model, String id);
-  Future<List<Map>> readExecute(String model, {List<ReadFilter> filters});
+  Future<Map> commitLocalCreate(String model, Map metadata);
+  Future<Map> commitLocalUpdate(String model, Map metadata);
+  Future<Map> commitLocalDelete(String model, String id);
+  Future<List<Map>> executeLocalRead(String model, {List<ReadFilter> filters});
 
   /// Note: it may handle proper auth when fetching upstream data.
-  Future<ServerSyncResponse> fetchUpstreamData(
+  Future<ServerSyncResponse> postSyncEndpoint(
       int logicalClock, List<SyncDiff> localDiffs);
 
   Future<List<SyncDiff>> getSyncDiffs() async {
     int logicalClock = await getLogicalClock();
-    List<Map> maps = await readExecute(
+    List<Map> maps = await executeLocalRead(
       SyncDiff.tableName,
       filters: [
         ReadFilter('logicalClock', FilterType.majorOrEqual, logicalClock)
@@ -28,20 +28,21 @@ abstract class MobyncClient {
   }
 
   Future<int> getLogicalClock() async {
-    int logicalClock = await readExecute(SyncMetaData.tableName).then((value) {
+    int logicalClock =
+        await executeLocalRead(SyncMetaData.tableName).then((value) {
       return value.length > 0 ? value[0]['logicalClock'] : 0;
     });
     return Future.value(logicalClock);
   }
 
   Future<void> _setLogicalClock(int logicalClock) async {
-    Map updatedMetadata = await updateExecute(
+    Map updatedMetadata = await commitLocalUpdate(
       SyncMetaData.tableName,
       {'id': SyncMetaData.id, 'logicalClock': logicalClock},
     );
 
     if (updatedMetadata == null)
-      await createExecute(
+      await commitLocalCreate(
         SyncMetaData.tableName,
         {'id': SyncMetaData.id, 'logicalClock': logicalClock},
       );
@@ -49,8 +50,8 @@ abstract class MobyncClient {
 
   Future<MobyncResponse> create(String model, Map metadata) async {
     try {
-      await createExecute(model, metadata);
-      await createExecute(
+      await commitLocalCreate(model, metadata);
+      await commitLocalCreate(
           SyncDiff.tableName,
           SyncDiff(
             id: Uuid().v1(),
@@ -75,8 +76,8 @@ abstract class MobyncClient {
 
   Future<MobyncResponse> update(String model, Map metadata) async {
     try {
-      await updateExecute(model, metadata);
-      await createExecute(
+      await commitLocalUpdate(model, metadata);
+      await commitLocalCreate(
           SyncDiff.tableName,
           SyncDiff(
             id: Uuid().v1(),
@@ -101,8 +102,8 @@ abstract class MobyncClient {
 
   Future<MobyncResponse> delete(String model, String id) async {
     try {
-      await deleteExecute(model, id);
-      await createExecute(
+      await commitLocalDelete(model, id);
+      await commitLocalCreate(
           SyncDiff.tableName,
           SyncDiff(
             id: Uuid().v1(),
@@ -127,7 +128,7 @@ abstract class MobyncClient {
 
   Future<MobyncResponse> read(String model, {List<ReadFilter> filters}) async {
     try {
-      List<Map> filteredData = await readExecute(model, filters: filters);
+      List<Map> filteredData = await executeLocalRead(model, filters: filters);
       return Future.value(MobyncResponse(
         success: true,
         data: filteredData,
@@ -144,7 +145,7 @@ abstract class MobyncClient {
     int logicalClock = await getLogicalClock();
     List<SyncDiff> localDiffs = await getSyncDiffs();
     ServerSyncResponse upstream =
-        await fetchUpstreamData(logicalClock, localDiffs);
+        await postSyncEndpoint(logicalClock, localDiffs);
 
     _setLogicalClock(upstream.logicalClock + 1);
     if (upstream.diffs.length > 0) executeSyncDiffs(upstream.diffs);
@@ -156,20 +157,20 @@ abstract class MobyncClient {
       Map metadata = shallowCopy(el.metadata);
       switch (el.type) {
         case CREATE_OPERATION:
-          res = await createExecute(el.model, metadata);
+          res = await commitLocalCreate(el.model, metadata);
           break;
         case UPDATE_OPERATION:
-          res = await updateExecute(el.model, metadata);
+          res = await commitLocalUpdate(el.model, metadata);
           break;
         case DELETE_OPERATION:
-          res = await deleteExecute(el.model, metadata['id']);
+          res = await commitLocalDelete(el.model, metadata['id']);
           break;
         default:
           throw Exception('Invalid Operation.');
           break;
       }
 
-      if (res != null) await createExecute(SyncDiff.tableName, el.toMap());
+      if (res != null) await commitLocalCreate(SyncDiff.tableName, el.toMap());
     });
   }
 
