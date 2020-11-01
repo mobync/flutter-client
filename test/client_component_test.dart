@@ -108,6 +108,7 @@ void main() {
     expect(res1.data, [
       {'id': 'uuid1', 'field1': 'xxx'}
     ]);
+
     MobyncResponse res2 = await client2.read('model1');
     expect(res2.success, true);
     expect(res2.data, [

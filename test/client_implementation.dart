@@ -44,7 +44,7 @@ class ServerMockup {
 }
 
 class MyMobyncClient extends MobyncClient {
-  Map<String, List> _data = {
+  Map<String, List> data = {
     'model1': <Map>[],
     SyncMetaData.tableName: <Map>[],
     SyncDiff.tableName: <Map>[],
@@ -52,24 +52,24 @@ class MyMobyncClient extends MobyncClient {
 
   @override
   Future<Map> commitLocalCreate(String model, Map metadata) {
-    for (int i = 0; i < _data[model].length; i++)
-      if (_data[model][i]['id'] == metadata['id']) {
+    for (int i = 0; i < data[model].length; i++)
+      if (data[model][i]['id'] == metadata['id']) {
         throw Exception('Id already exists!');
       }
 
-    _data[model].add(metadata);
+    data[model].add(metadata);
 
-    return Future.value(_data[model][_data[model].length - 1]);
+    return Future.value(data[model][data[model].length - 1]);
   }
 
   @override
   Future<Map> commitLocalUpdate(String model, Map metadata) {
-    for (int i = 0; i < _data[model].length; i++)
-      if (_data[model][i]['id'] == metadata['id']) {
+    for (int i = 0; i < data[model].length; i++)
+      if (data[model][i]['id'] == metadata['id']) {
         metadata.forEach((key, value) {
-          _data[model][i][key] = value;
+          data[model][i][key] = value;
         });
-        return Future.value(_data[model][i]);
+        return Future.value(data[model][i]);
       }
     return Future.value(null);
   }
@@ -77,9 +77,9 @@ class MyMobyncClient extends MobyncClient {
   @override
   Future<Map> commitLocalDelete(String model, String id) {
     var removedAt;
-    for (int i = 0; i < _data[model].length; i++)
-      if (_data[model][i]['id'] == id) {
-        removedAt = _data[model].removeAt(i);
+    for (int i = 0; i < data[model].length; i++)
+      if (data[model][i]['id'] == id) {
+        removedAt = data[model].removeAt(i);
       }
 
     return Future.value(removedAt);
@@ -87,32 +87,32 @@ class MyMobyncClient extends MobyncClient {
 
   @override
   Future<List<Map>> executeLocalRead(String model, {List<ReadFilter> filters}) {
-    List<Map> _filteredData = _data[model];
+    List<Map> filteredData = data[model];
     if (filters != null)
       filters.forEach((filter) {
         switch (filter.filterBy) {
           case FilterType.inside:
-            _filteredData = _filteredData.where((v) {
+            filteredData = filteredData.where((v) {
               return filter.data.contains(v[filter.fieldName]);
             }).toList();
             break;
           case FilterType.major:
-            _filteredData = _filteredData.where((v) {
+            filteredData = filteredData.where((v) {
               return v[filter.fieldName] > filter.data;
             }).toList();
             break;
           case FilterType.majorOrEqual:
-            _filteredData = _filteredData.where((v) {
+            filteredData = filteredData.where((v) {
               return v[filter.fieldName] >= filter.data;
             }).toList();
             break;
           case FilterType.minor:
-            _filteredData = _filteredData.where((v) {
+            filteredData = filteredData.where((v) {
               return v[filter.fieldName] < filter.data;
             }).toList();
             break;
           case FilterType.minorOrEqual:
-            _filteredData = _filteredData.where((v) {
+            filteredData = filteredData.where((v) {
               return v[filter.fieldName] <= filter.data;
             }).toList();
             break;
@@ -121,9 +121,9 @@ class MyMobyncClient extends MobyncClient {
         }
       });
 
-    _filteredData.sort((a, b) => (a['id'] as String).compareTo(b['id']));
+    filteredData.sort((a, b) => (a['id'] as String).compareTo(b['id']));
 
-    return Future.value(_filteredData);
+    return Future.value(filteredData);
   }
 
   Future<ServerSyncResponse> postSyncEndpoint(
