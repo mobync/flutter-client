@@ -51,29 +51,35 @@ void main() {
     /// SYNC DIFFS List
     List<SyncDiff> res8 = await client.getSyncDiffs();
     expect(
-        res8.map((e) => [e.logicalClock, e.type, e.model, e.metadata]).toList(),
+        res8
+            .map((e) => e
+                .toMap(
+                    onlyFields: ['logicalClock', 'type', 'model', 'metadata'])
+                .values
+                .toList())
+            .toList(),
         [
           [
             0,
-            'CREATE',
+            'create',
             'model1',
             {'id': 'uuid1', 'campo1': 'abc'}
           ],
           [
             0,
-            'CREATE',
+            'create',
             'model1',
             {'id': 'uuid2', 'campo1': 'fgh'}
           ],
           [
             0,
-            'UPDATE',
+            'update',
             'model1',
             {'id': 'uuid1', 'campo1': 'xxx'}
           ],
           [
             0,
-            'DELETE',
+            'delete',
             'model1',
             {'id': 'uuid2'}
           ]
@@ -82,8 +88,7 @@ void main() {
 
   test('test upstream diffs fetch', () async {
     ServerMockup server = ServerMockup.instance;
-    List<SyncDiff> localDiffs, upstreamDiffs;
-    ServerSyncResponse upstreamResponse;
+    List<SyncDiff> localDiffs;
     int logicalClock;
 
     await client.synchronize();
@@ -98,7 +103,7 @@ void main() {
           utcTimestamp: (DateTime.now().subtract(Duration(minutes: 4)))
               .toUtc()
               .millisecondsSinceEpoch,
-          type: CREATE_OPERATION,
+          type: SyncDiffType.create,
           model: 'model1',
           metadata: {'id': 'uuid3', 'campo1': 'a'}),
       SyncDiff(
@@ -107,7 +112,7 @@ void main() {
           utcTimestamp: (DateTime.now().subtract(Duration(minutes: 3)))
               .toUtc()
               .millisecondsSinceEpoch,
-          type: UPDATE_OPERATION,
+          type: SyncDiffType.update,
           model: 'model1',
           metadata: {'id': 'uuid3', 'campo1': 'b'}),
       SyncDiff(
@@ -116,7 +121,7 @@ void main() {
           utcTimestamp: (DateTime.now().subtract(Duration(minutes: 2)))
               .toUtc()
               .millisecondsSinceEpoch,
-          type: CREATE_OPERATION,
+          type: SyncDiffType.create,
           model: 'model1',
           metadata: {'id': 'uuid4', 'campo1': 'c'}),
       SyncDiff(
@@ -125,7 +130,7 @@ void main() {
           utcTimestamp: (DateTime.now().subtract(Duration(minutes: 1)))
               .toUtc()
               .millisecondsSinceEpoch,
-          type: DELETE_OPERATION,
+          type: SyncDiffType.delete,
           model: 'model1',
           metadata: {'id': 'uuid3'})
     ];
@@ -160,63 +165,68 @@ void main() {
     logicalClock = await client.getLogicalClock();
     expect(logicalClock, 54);
   });
-
   test('test local diffs', () async {
     List<SyncDiff> res = await client.getSyncDiffs(logicalClock: 0);
     expect(
-        res.map((e) => [e.logicalClock, e.type, e.model, e.metadata]).toList(),
+        res
+            .map((e) => e
+                .toMap(
+                    onlyFields: ['logicalClock', 'type', 'model', 'metadata'])
+                .values
+                .toList())
+            .toList(),
         [
           [
             0,
-            'CREATE',
+            'create',
             'model1',
             {'id': 'uuid1', 'campo1': 'abc'}
           ],
           [
             0,
-            'CREATE',
+            'create',
             'model1',
             {'id': 'uuid2', 'campo1': 'fgh'}
           ],
           [
             0,
-            'UPDATE',
+            'update',
             'model1',
             {'id': 'uuid1', 'campo1': 'xxx'}
           ],
           [
             0,
-            'DELETE',
+            'delete',
             'model1',
             {'id': 'uuid2'}
           ],
           [
             51,
-            'CREATE',
+            'create',
             'model1',
             {'id': 'uuid3', 'campo1': 'a'}
           ],
           [
             51,
-            'UPDATE',
+            'update',
             'model1',
             {'id': 'uuid3', 'campo1': 'b'}
           ],
           [
             51,
-            'CREATE',
+            'create',
             'model1',
             {'id': 'uuid4', 'campo1': 'c'}
           ],
           [
             51,
-            'DELETE',
+            'delete',
             'model1',
             {'id': 'uuid3'}
           ],
           [
             52,
-            'CREATE',
+            'create',
             'model1',
             {'id': 'uuid5', 'campo1': 'abc'}
           ]

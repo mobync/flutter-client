@@ -57,7 +57,7 @@ abstract class MobyncClient {
             id: Uuid().v1(),
             logicalClock: await getLogicalClock(),
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
-            type: CREATE_OPERATION,
+            type: SyncDiffType.create,
             model: model,
             metadata: shallowCopy(metadata),
           ).toMap());
@@ -83,7 +83,7 @@ abstract class MobyncClient {
             id: Uuid().v1(),
             logicalClock: await getLogicalClock(),
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
-            type: UPDATE_OPERATION,
+            type: SyncDiffType.update,
             model: model,
             metadata: shallowCopy(metadata),
           ).toMap());
@@ -109,7 +109,7 @@ abstract class MobyncClient {
             id: Uuid().v1(),
             logicalClock: await getLogicalClock(),
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
-            type: DELETE_OPERATION,
+            type: SyncDiffType.delete,
             model: model,
             metadata: {'id': id},
           ).toMap());
@@ -156,13 +156,13 @@ abstract class MobyncClient {
       Map res;
       Map metadata = shallowCopy(el.metadata);
       switch (el.type) {
-        case CREATE_OPERATION:
+        case SyncDiffType.create:
           res = await commitLocalCreate(el.model, metadata);
           break;
-        case UPDATE_OPERATION:
+        case SyncDiffType.update:
           res = await commitLocalUpdate(el.model, metadata);
           break;
-        case DELETE_OPERATION:
+        case SyncDiffType.delete:
           res = await commitLocalDelete(el.model, metadata['id']);
           break;
         default:

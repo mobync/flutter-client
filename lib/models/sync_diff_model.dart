@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
+import 'package:mobync/constants/constants.dart';
 
 class SyncDiff extends Comparable with EquatableMixin {
   SyncDiff({
@@ -11,8 +13,8 @@ class SyncDiff extends Comparable with EquatableMixin {
   });
 
   static final String tableName = 'MobyncSyncDiffsTable';
-  String id;
-  String type, model;
+  String id, model;
+  SyncDiffType type;
   Map metadata;
   int logicalClock, utcTimestamp;
 
@@ -47,20 +49,30 @@ class SyncDiff extends Comparable with EquatableMixin {
     id = map['id'];
     logicalClock = map['logicalClock'];
     utcTimestamp = map['utcTimestamp'];
-    type = map['type'];
+    type = map['type'] is SyncDiffType
+        ? map['type']
+        : SyncDiffTypesReversedMap[map['type']];
     model = map['model'];
     metadata = map['metadata'];
   }
 
-  Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{
+  Map<String, dynamic> toMap({List<String> onlyFields}) {
+    Map<String, dynamic> map = {
       'id': id,
       'logicalClock': logicalClock,
       'utcTimestamp': utcTimestamp,
-      'type': type,
+      'type': describeEnum(type),
       'model': model,
       'metadata': metadata,
     };
+
+    if (onlyFields != null) {
+      var keys = map.keys.toList();
+      keys.forEach((key) {
+        if (!onlyFields.contains(key)) map.remove(key);
+      });
+    }
+
     return map;
   }
 
@@ -70,7 +82,7 @@ class SyncDiff extends Comparable with EquatableMixin {
         'id: $id,'
         'clock: $logicalClock,'
         'utcTimestamp: $utcTimestamp,'
-        'type: $type,'
+        'type: ${describeEnum(type)},'
         'model: $model,'
         'metadata: $metadata'
         '}';
