@@ -66,7 +66,7 @@ void main() {
     ]);
 
     int logicalClock2 = await client2.getLogicalClock();
-    expect(logicalClock2, 3);
+    expect(logicalClock2, 4);
   });
 
   test('client 1 synchronizes', () async {
@@ -81,7 +81,7 @@ void main() {
     ]);
 
     int logicalClock1 = await client1.getLogicalClock();
-    expect(logicalClock1, 4);
+    expect(logicalClock1, 6);
   });
 
   test('client 2 synchronizes', () async {
@@ -95,8 +95,8 @@ void main() {
       {'id': 'uuid3', 'field1': 'c'},
     ]);
 
-    int logicalClock1 = await client1.getLogicalClock();
-    expect(logicalClock1, 4);
+    int logicalClock2 = await client2.getLogicalClock();
+    expect(logicalClock2, 6);
   });
 
   test('client 2 updates client 1 object and both synchronizes', () async {
@@ -115,6 +115,9 @@ void main() {
       {'id': 'uuid3', 'field1': 'c'},
     ]);
 
+    int logicalClock1 = await client1.getLogicalClock();
+    expect(logicalClock1, 8);
+
     MobyncResponse res2 = await client2.read('model1');
     expect(res2.success, true);
     expect(res2.data, [
@@ -122,6 +125,9 @@ void main() {
       {'id': 'uuid2', 'field1': 'b'},
       {'id': 'uuid3', 'field1': 'c'},
     ]);
+
+    int logicalClock2 = await client2.getLogicalClock();
+    expect(logicalClock2, 8);
   });
 
   test('client 1 deletes client 2 object and both synchronizes', () async {

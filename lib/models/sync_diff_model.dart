@@ -39,13 +39,6 @@ class SyncDiff extends Comparable with EquatableMixin {
   }
 
   SyncDiff.fromMap(Map<String, dynamic> map) {
-    assert(map.containsKey('id'));
-    assert(map.containsKey('logicalClock'));
-    assert(map.containsKey('utcTimestamp'));
-    assert(map.containsKey('type'));
-    assert(map.containsKey('model'));
-    assert(map.containsKey('metadata'));
-
     id = map['id'];
     logicalClock = map['logicalClock'];
     utcTimestamp = map['utcTimestamp'];
@@ -80,7 +73,7 @@ class SyncDiff extends Comparable with EquatableMixin {
   String toString() {
     return 'SyncDiff: {'
         'id: $id,'
-        'clock: $logicalClock,'
+        'logicalClock: $logicalClock,'
         'utcTimestamp: $utcTimestamp,'
         'type: ${describeEnum(type)},'
         'model: $model,'

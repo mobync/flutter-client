@@ -16,13 +16,17 @@ class ServerMockup {
     int userLogicalClock,
     List<SyncDiff> userDiffs,
   ) {
-    serverLogicalClock = max(serverLogicalClock, userLogicalClock) + 1;
+    if (userDiffs.length > 0) {
+      serverLogicalClock = max(serverLogicalClock, userLogicalClock) + 1;
 
-    userDiffs.forEach((e) {
-      e.logicalClock = serverLogicalClock;
-      serverDiffs.add(e);
-    });
-    serverDiffs.sort();
+      userDiffs.forEach((e) {
+        e.logicalClock = serverLogicalClock;
+        serverDiffs.add(e);
+      });
+      serverDiffs.sort();
+
+      serverLogicalClock = max(serverLogicalClock, userLogicalClock) + 1;
+    }
   }
 
   Future<ServerSyncResponse> syncEndpoint(
@@ -30,9 +34,9 @@ class ServerMockup {
     List<SyncDiff> userDiffs,
   ) {
     var diffs =
-        serverDiffs.where((e) => e.logicalClock >= userLogicalClock).toList();
+        serverDiffs.where((e) => e.logicalClock > userLogicalClock).toList();
 
-    if (userDiffs.length > 0) mergeDiffs(userLogicalClock, userDiffs);
+    mergeDiffs(userLogicalClock, userDiffs ?? []);
 
     return Future.value(ServerSyncResponse(serverLogicalClock, diffs));
   }
@@ -54,7 +58,7 @@ class MyMobyncClient extends MobyncClient {
   Future<Map> commitLocalCreate(String model, Map metadata) {
     for (int i = 0; i < data[model].length; i++)
       if (data[model][i]['id'] == metadata['id']) {
-        throw Exception('Id already exists!');
+        throw Exception('Id already exists for $model and $metadata!');
       }
 
     data[model].add(metadata);

@@ -9,44 +9,8 @@ abstract class MobyncClient {
   Future<Map> commitLocalUpdate(String model, Map metadata);
   Future<Map> commitLocalDelete(String model, String id);
   Future<List<Map>> executeLocalRead(String model, {List<ReadFilter> filters});
-
-  /// Note: it may handle proper auth when fetching upstream data.
   Future<ServerSyncResponse> postSyncEndpoint(
       int logicalClock, List<SyncDiff> localDiffs);
-
-  Future<List<SyncDiff>> getSyncDiffs({logicalClock}) async {
-    if (logicalClock == null) logicalClock = await getLogicalClock();
-    List<Map> maps = await executeLocalRead(
-      SyncDiff.tableName,
-      filters: [
-        ReadFilter('logicalClock', FilterType.majorOrEqual, logicalClock)
-      ],
-    );
-    List<SyncDiff> diffs = maps.map((e) => SyncDiff.fromMap(e)).toList();
-    diffs.sort();
-    return diffs;
-  }
-
-  Future<int> getLogicalClock() async {
-    int logicalClock =
-        await executeLocalRead(SyncMetaData.tableName).then((value) {
-      return value.length > 0 ? value[0]['logicalClock'] : 0;
-    });
-    return Future.value(logicalClock);
-  }
-
-  Future<void> _setLogicalClock(int logicalClock) async {
-    Map updatedMetadata = await commitLocalUpdate(
-      SyncMetaData.tableName,
-      {'id': SyncMetaData.id, 'logicalClock': logicalClock},
-    );
-
-    if (updatedMetadata == null)
-      await commitLocalCreate(
-        SyncMetaData.tableName,
-        {'id': SyncMetaData.id, 'logicalClock': logicalClock},
-      );
-  }
 
   Future<MobyncResponse> create(String model, Map metadata) async {
     try {
@@ -144,14 +108,15 @@ abstract class MobyncClient {
   Future<void> synchronize() async {
     int logicalClock = await getLogicalClock();
     List<SyncDiff> localDiffs = await getSyncDiffs();
-    ServerSyncResponse upstream =
-        await postSyncEndpoint(logicalClock, localDiffs);
+    ServerSyncResponse res = await postSyncEndpoint(logicalClock, localDiffs);
 
-    _setLogicalClock(upstream.logicalClock + 1);
-    if (upstream.diffs.length > 0) executeSyncDiffs(upstream.diffs);
+    if (res.logicalClock > logicalClock) {
+      _executeSyncDiffs(res.diffs);
+      _setLogicalClock(res.logicalClock);
+    }
   }
 
-  Future<void> executeSyncDiffs(List<SyncDiff> diffs) async {
+  Future<void> _executeSyncDiffs(List<SyncDiff> diffs) async {
     diffs.forEach((el) async {
       Map res;
       Map metadata = shallowCopy(el.metadata);
@@ -172,6 +137,40 @@ abstract class MobyncClient {
 
       if (res != null) await commitLocalCreate(SyncDiff.tableName, el.toMap());
     });
+  }
+
+  Future<List<SyncDiff>> getSyncDiffs({logicalClock}) async {
+    if (logicalClock == null) logicalClock = await getLogicalClock();
+    List<Map> maps = await executeLocalRead(
+      SyncDiff.tableName,
+      filters: [
+        ReadFilter('logicalClock', FilterType.majorOrEqual, logicalClock)
+      ],
+    );
+    List<SyncDiff> diffs = maps.map((e) => SyncDiff.fromMap(e)).toList();
+    diffs.sort();
+    return diffs;
+  }
+
+  Future<int> getLogicalClock() async {
+    int logicalClock =
+        await executeLocalRead(SyncMetaData.tableName).then((value) {
+      return value.length > 0 ? value[0]['logicalClock'] : 0;
+    });
+    return Future.value(logicalClock);
+  }
+
+  Future<void> _setLogicalClock(int logicalClock) async {
+    Map updatedMetadata = await commitLocalUpdate(
+      SyncMetaData.tableName,
+      {'id': SyncMetaData.id, 'logicalClock': logicalClock},
+    );
+
+    if (updatedMetadata == null)
+      await commitLocalCreate(
+        SyncMetaData.tableName,
+        {'id': SyncMetaData.id, 'logicalClock': logicalClock},
+      );
   }
 
   shallowCopy(obj) {
