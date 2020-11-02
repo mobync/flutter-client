@@ -1,8 +1,7 @@
 name: mobync
 description: Mobync Flutter Client Package
-version: 0.0.1
-author:
-homepage:
+version: 0.0.2
+homepage: https://github.com/mobync/flutter-client
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -10,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
+  equatable: ^1.2.5
+  uuid: ^2.0.2
 
 dev_dependencies:
   flutter_test:
