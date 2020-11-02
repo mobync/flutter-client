@@ -7,8 +7,8 @@ import 'package:mobync/models/models.dart';
 import 'package:uuid/uuid.dart';
 
 abstract class MobyncClient {
-  Future<Map> commitLocalCreate(String model, Map metadata);
-  Future<Map> commitLocalUpdate(String model, Map metadata);
+  Future<Map> commitLocalCreate(String model, Map<String, dynamic> data);
+  Future<Map> commitLocalUpdate(String model, Map<String, dynamic> data);
   Future<Map> commitLocalDelete(String model, String id);
   Future<List<Map>> executeLocalRead(String model, {List<ReadFilter> filters});
   Future<ServerSyncResponse> postSyncEndpoint(
