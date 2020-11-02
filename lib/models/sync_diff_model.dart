@@ -9,18 +9,17 @@ class SyncDiff extends Comparable with EquatableMixin {
     this.utcTimestamp,
     this.type,
     this.model,
-    this.metadata,
+    this.jsonData,
   });
 
   static final String tableName = 'MobyncSyncDiffsTable';
-  String id, model;
+  String id, model, jsonData;
   SyncDiffType type;
-  Map metadata;
   int logicalClock, utcTimestamp;
 
   @override
   List<Object> get props =>
-      [id, logicalClock, utcTimestamp, type, model, metadata];
+      [id, logicalClock, utcTimestamp, type, model, jsonData];
 
   @override
   int compareTo(other) {
@@ -46,7 +45,7 @@ class SyncDiff extends Comparable with EquatableMixin {
         ? map['type']
         : SyncDiffTypesReversedMap[map['type']];
     model = map['model'];
-    metadata = map['metadata'];
+    jsonData = map['jsonData'];
   }
 
   Map<String, dynamic> toMap({List<String> onlyFields}) {
@@ -56,7 +55,7 @@ class SyncDiff extends Comparable with EquatableMixin {
       'utcTimestamp': utcTimestamp,
       'type': describeEnum(type),
       'model': model,
-      'metadata': metadata,
+      'jsonData': jsonData,
     };
 
     if (onlyFields != null) {
@@ -77,7 +76,7 @@ class SyncDiff extends Comparable with EquatableMixin {
         'utcTimestamp: $utcTimestamp,'
         'type: ${describeEnum(type)},'
         'model: $model,'
-        'metadata: $metadata'
+        'jsonData: $jsonData'
         '}';
   }
 }

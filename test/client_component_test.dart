@@ -67,35 +67,15 @@ void main() {
         res8
             .map((e) => e
                 .toMap(
-                    onlyFields: ['logicalClock', 'type', 'model', 'metadata'])
+                    onlyFields: ['logicalClock', 'type', 'model', 'jsonData'])
                 .values
                 .toList())
             .toList(),
         [
-          [
-            0,
-            'create',
-            'model1',
-            {'id': 'uuid1', 'field1': 'abc'}
-          ],
-          [
-            0,
-            'create',
-            'model1',
-            {'id': 'uuid2', 'field1': 'fgh'}
-          ],
-          [
-            0,
-            'update',
-            'model1',
-            {'id': 'uuid1', 'field1': 'xxx'}
-          ],
-          [
-            0,
-            'delete',
-            'model1',
-            {'id': 'uuid2'}
-          ]
+          [0, 'create', 'model1', '{"id":"uuid1","field1":"abc"}'],
+          [0, 'create', 'model1', '{"id":"uuid2","field1":"fgh"}'],
+          [0, 'update', 'model1', '{"id":"uuid1","field1":"xxx"}'],
+          [0, 'delete', 'model1', '{"id":"uuid2"}']
         ]);
   });
 

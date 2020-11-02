@@ -1,4 +1,4 @@
-export 'meta_sync_model.dart';
+export 'sync_metadata_model.dart';
 export 'read_filter.dart';
 export 'response_model.dart';
 export 'server_sync_response.dart';

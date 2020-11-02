@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:mobync/mobync.dart';
 import 'package:mobync/constants/constants.dart';
-import 'package:mobync/models/meta_sync_model.dart';
 import 'package:mobync/models/models.dart';
 
 class ServerMockup {
@@ -48,32 +47,32 @@ class ServerMockup {
 }
 
 class MyMobyncClient extends MobyncClient {
-  Map<String, List> data = {
+  Map<String, List> db = {
     'model1': <Map>[],
     SyncMetaData.tableName: <Map>[],
     SyncDiff.tableName: <Map>[],
   };
 
   @override
-  Future<Map> commitLocalCreate(String model, Map metadata) {
-    for (int i = 0; i < data[model].length; i++)
-      if (data[model][i]['id'] == metadata['id']) {
-        throw Exception('Id already exists for $model and $metadata!');
+  Future<Map> commitLocalCreate(String model, Map data) {
+    for (int i = 0; i < db[model].length; i++)
+      if (db[model][i]['id'] == data['id']) {
+        throw Exception('Id already exists for $model and $data!');
       }
 
-    data[model].add(metadata);
+    db[model].add(data);
 
-    return Future.value(data[model][data[model].length - 1]);
+    return Future.value(db[model][db[model].length - 1]);
   }
 
   @override
-  Future<Map> commitLocalUpdate(String model, Map metadata) {
-    for (int i = 0; i < data[model].length; i++)
-      if (data[model][i]['id'] == metadata['id']) {
-        metadata.forEach((key, value) {
-          data[model][i][key] = value;
+  Future<Map> commitLocalUpdate(String model, Map data) {
+    for (int i = 0; i < db[model].length; i++)
+      if (db[model][i]['id'] == data['id']) {
+        data.forEach((key, value) {
+          db[model][i][key] = value;
         });
-        return Future.value(data[model][i]);
+        return Future.value(db[model][i]);
       }
     return Future.value(null);
   }
@@ -81,9 +80,9 @@ class MyMobyncClient extends MobyncClient {
   @override
   Future<Map> commitLocalDelete(String model, String id) {
     var removedAt;
-    for (int i = 0; i < data[model].length; i++)
-      if (data[model][i]['id'] == id) {
-        removedAt = data[model].removeAt(i);
+    for (int i = 0; i < db[model].length; i++)
+      if (db[model][i]['id'] == id) {
+        removedAt = db[model].removeAt(i);
       }
 
     return Future.value(removedAt);
@@ -91,7 +90,7 @@ class MyMobyncClient extends MobyncClient {
 
   @override
   Future<List<Map>> executeLocalRead(String model, {List<ReadFilter> filters}) {
-    List<Map> filteredData = data[model];
+    List<Map> filteredData = db[model];
     if (filters != null)
       filters.forEach((filter) {
         switch (filter.filterBy) {

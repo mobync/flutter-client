@@ -1,5 +1,7 @@
 library mobync;
 
+import 'dart:convert';
+
 import 'package:mobync/constants/constants.dart';
 import 'package:mobync/models/models.dart';
 import 'package:uuid/uuid.dart';
@@ -23,7 +25,7 @@ abstract class MobyncClient {
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
             type: SyncDiffType.create,
             model: model,
-            metadata: shallowCopy(metadata),
+            jsonData: jsonEncode(metadata),
           ).toMap());
 
       return Future.value(MobyncResponse(
@@ -49,7 +51,7 @@ abstract class MobyncClient {
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
             type: SyncDiffType.update,
             model: model,
-            metadata: shallowCopy(metadata),
+            jsonData: jsonEncode(metadata),
           ).toMap());
 
       return Future.value(MobyncResponse(
@@ -75,7 +77,7 @@ abstract class MobyncClient {
             utcTimestamp: DateTime.now().toUtc().millisecondsSinceEpoch,
             type: SyncDiffType.delete,
             model: model,
-            metadata: {'id': id},
+            jsonData: jsonEncode({'id': id}),
           ).toMap());
 
       return Future.value(MobyncResponse(
@@ -119,16 +121,16 @@ abstract class MobyncClient {
   Future<void> _executeSyncDiffs(List<SyncDiff> diffs) async {
     diffs.forEach((el) async {
       Map res;
-      Map metadata = shallowCopy(el.metadata);
+      Map data = jsonDecode(el.jsonData);
       switch (el.type) {
         case SyncDiffType.create:
-          res = await commitLocalCreate(el.model, metadata);
+          res = await commitLocalCreate(el.model, data);
           break;
         case SyncDiffType.update:
-          res = await commitLocalUpdate(el.model, metadata);
+          res = await commitLocalUpdate(el.model, data);
           break;
         case SyncDiffType.delete:
-          res = await commitLocalDelete(el.model, metadata['id']);
+          res = await commitLocalDelete(el.model, data['id']);
           break;
         default:
           throw Exception('Invalid Operation.');
