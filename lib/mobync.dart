@@ -13,38 +13,6 @@ abstract class MobyncClient {
   Future<List<Map>> executeLocalRead(String model, {List<ReadFilter> filters});
   String get syncEndpoint;
 
-  Future<ServerSyncResponse> postSyncEndpoint(
-      int logicalClock, List<SyncDiff> localDiffs) async {
-    try {
-      String body = jsonEncode({
-        'logicalClock': await getLogicalClock(),
-        'diffs': localDiffs.map((e) => e.toMap()).toList(),
-      });
-
-      http.Response resp = await http.post(syncEndpoint,
-          headers: {'Content-Type': 'application/json'}, body: body);
-
-      if (resp.statusCode.toString().startsWith('2')) {
-        Map res = jsonDecode(resp.body);
-        List<SyncDiff> syncDiffs =
-            (res['diffs'] as List).map((e) => SyncDiff.fromMap(e)).toList();
-        syncDiffs.sort();
-        return Future.value(ServerSyncResponse(
-          success: true,
-          logicalClock: res['logicalClock'],
-          diffs: syncDiffs,
-        ));
-      } else {
-        throw Exception('Request failed.');
-      }
-    } catch (e) {
-      return Future.value(ServerSyncResponse(
-        success: false,
-        message: e.toString(),
-      ));
-    }
-  }
-
   Future<MobyncResponse> create(String model, Map metadata) async {
     try {
       await commitLocalCreate(model, metadata);
@@ -143,9 +111,19 @@ abstract class MobyncClient {
     List<SyncDiff> localDiffs = await getSyncDiffs();
     ServerSyncResponse res = await postSyncEndpoint(logicalClock, localDiffs);
 
-    if (res.logicalClock > logicalClock) {
-      await executeSyncDiffs(res.diffs);
-      await setLogicalClock(res.logicalClock);
+    if (res.success) {
+      if (res.logicalClock > logicalClock) {
+        try {
+          await executeSyncDiffs(res.diffs);
+          await setLogicalClock(res.logicalClock);
+        } catch (e) {
+          print(e);
+          return false;
+        }
+      }
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -170,6 +148,38 @@ abstract class MobyncClient {
 
       if (res != null) await commitLocalCreate(SyncDiff.tableName, el.toMap());
     });
+  }
+
+  Future<ServerSyncResponse> postSyncEndpoint(
+      int logicalClock, List<SyncDiff> localDiffs) async {
+    try {
+      String body = jsonEncode({
+        'logicalClock': await getLogicalClock(),
+        'diffs': localDiffs.map((e) => e.toMap()).toList(),
+      });
+
+      http.Response resp = await http.post(syncEndpoint,
+          headers: {'Content-Type': 'application/json'}, body: body);
+
+      if (resp.statusCode.toString().startsWith('2')) {
+        Map res = jsonDecode(resp.body);
+        List<SyncDiff> syncDiffs =
+            (res['diffs'] as List).map((e) => SyncDiff.fromMap(e)).toList();
+        syncDiffs.sort();
+        return Future.value(ServerSyncResponse(
+          success: true,
+          logicalClock: res['logicalClock'],
+          diffs: syncDiffs,
+        ));
+      } else {
+        throw Exception('Request failed.');
+      }
+    } catch (e) {
+      return Future.value(ServerSyncResponse(
+        success: false,
+        message: e.toString(),
+      ));
+    }
   }
 
   Future<List<SyncDiff>> getSyncDiffs({logicalClock}) async {
@@ -207,17 +217,5 @@ abstract class MobyncClient {
         {'id': SyncMetaData.id, 'logicalClock': logicalClock},
       );
     }
-  }
-
-  shallowCopy(obj) {
-    if (obj == null) return null;
-
-    if (obj is Map) {
-      Map res = {};
-      obj.forEach((key, value) => res[key] = value);
-      return res;
-    }
-
-    throw Exception('Shallow copy not supported for this type.');
   }
 }

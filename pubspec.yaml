@@ -1,6 +1,6 @@
 name: mobync
 description: Mobync Flutter Client Package
-version: 0.0.3
+version: 0.0.4
 homepage: https://github.com/mobync/flutter-client
 
 environment:
