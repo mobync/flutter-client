@@ -14,6 +14,7 @@ You might implement the ```MobyncClient``` abstract class. At this moment we do 
 
 ```dart
     MyMobyncClient client = MyMobyncClient.instance;
+    
     /// Create an instance.
     final obj1 = {'id': 'uuid1', 'field1': 'a', 'field2': 'b'};
     MobyncResponse res1 = await client1.create('model1', obj1);
@@ -24,7 +25,6 @@ You might implement the ```MobyncClient``` abstract class. At this moment we do 
 
     /// Delete an instance.
     MobyncResponse res = await client1.delete('model1', 'uuid3');
-    expect(res.success, true);
 
     /// Synchronize.
     await client1.synchronize();
@@ -71,6 +71,8 @@ import 'package:sqlitemobyncdemo/myModel.dart';
 class MyMobyncClient extends MobyncClient {
   MyMobyncClient._privateConstructor();
   static final MyMobyncClient instance = MyMobyncClient._privateConstructor();
+
+  String get syncEndpoint => 'http://192.168.0.70:5000/sync';
 
   Database _database;
   Future<Database> get database async {
@@ -166,8 +168,6 @@ class MyMobyncClient extends MobyncClient {
 
     return Future.value(filteredData);
   }
-
-  String get syncEndpoint => 'http://192.168.0.70:5000/sync';
 }
 
 ```
