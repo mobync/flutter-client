@@ -35,7 +35,11 @@ class ServerMockup {
 
     mergeDiffs(userLogicalClock, userDiffs ?? []);
 
-    return Future.value(ServerSyncResponse(serverLogicalClock, diffs));
+    return Future.value(ServerSyncResponse(
+      success: true,
+      logicalClock: serverLogicalClock,
+      diffs: diffs,
+    ));
   }
 
   void reset() {
@@ -121,6 +125,9 @@ class MyMobyncClient extends MobyncClient {
     return Future.value(filteredData);
   }
 
+  String get syncEndpoint => "";
+
+  @override
   Future<ServerSyncResponse> postSyncEndpoint(
       int logicalClock, List<SyncDiff> localDiffs) async {
     ServerMockup instance = ServerMockup.instance;

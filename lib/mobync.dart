@@ -1,8 +1,7 @@
 library mobync;
 
 import 'dart:convert';
-import 'dart:math';
-
+import 'package:http/http.dart' as http;
 import 'package:mobync/constants/constants.dart';
 import 'package:mobync/models/models.dart';
 import 'package:uuid/uuid.dart';
@@ -12,8 +11,39 @@ abstract class MobyncClient {
   Future<Map> commitLocalUpdate(String model, Map<String, dynamic> data);
   Future<Map> commitLocalDelete(String model, String id);
   Future<List<Map>> executeLocalRead(String model, {List<ReadFilter> filters});
+  String get syncEndpoint;
+
   Future<ServerSyncResponse> postSyncEndpoint(
-      int logicalClock, List<SyncDiff> localDiffs);
+      int logicalClock, List<SyncDiff> localDiffs) async {
+    try {
+      String body = jsonEncode({
+        'logicalClock': await getLogicalClock(),
+        'diffs': localDiffs.map((e) => e.toMap()).toList(),
+      });
+
+      http.Response resp = await http.post(syncEndpoint,
+          headers: {'Content-Type': 'application/json'}, body: body);
+
+      if (resp.statusCode.toString().startsWith('2')) {
+        Map res = jsonDecode(resp.body);
+        List<SyncDiff> syncDiffs =
+            (res['diffs'] as List).map((e) => SyncDiff.fromMap(e)).toList();
+        syncDiffs.sort();
+        return Future.value(ServerSyncResponse(
+          success: true,
+          logicalClock: res['logicalClock'],
+          diffs: syncDiffs,
+        ));
+      } else {
+        throw Exception('Request failed.');
+      }
+    } catch (e) {
+      return Future.value(ServerSyncResponse(
+        success: false,
+        message: e.toString(),
+      ));
+    }
+  }
 
   Future<MobyncResponse> create(String model, Map metadata) async {
     try {
