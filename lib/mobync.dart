@@ -1,6 +1,7 @@
 library mobync;
 
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:mobync/constants/constants.dart';
 import 'package:mobync/models/models.dart';
@@ -113,12 +114,12 @@ abstract class MobyncClient {
     ServerSyncResponse res = await postSyncEndpoint(logicalClock, localDiffs);
 
     if (res.logicalClock > logicalClock) {
-      _executeSyncDiffs(res.diffs);
-      _setLogicalClock(res.logicalClock);
+      await executeSyncDiffs(res.diffs);
+      await setLogicalClock(res.logicalClock);
     }
   }
 
-  Future<void> _executeSyncDiffs(List<SyncDiff> diffs) async {
+  Future<void> executeSyncDiffs(List<SyncDiff> diffs) async {
     diffs.forEach((el) async {
       Map res;
       Map data = jsonDecode(el.jsonData);
@@ -155,24 +156,27 @@ abstract class MobyncClient {
   }
 
   Future<int> getLogicalClock() async {
-    int logicalClock =
-        await executeLocalRead(SyncMetaData.tableName).then((value) {
+    int logicalClock = await executeLocalRead(
+      SyncMetaData.tableName,
+      filters: [ReadFilter('id', FilterType.inside, SyncMetaData.id)],
+    ).then((value) {
       return value.length > 0 ? value[0]['logicalClock'] : 0;
     });
     return Future.value(logicalClock);
   }
 
-  Future<void> _setLogicalClock(int logicalClock) async {
+  Future<void> setLogicalClock(int logicalClock) async {
     Map updatedMetadata = await commitLocalUpdate(
       SyncMetaData.tableName,
       {'id': SyncMetaData.id, 'logicalClock': logicalClock},
     );
 
-    if (updatedMetadata == null)
+    if (updatedMetadata == null) {
       await commitLocalCreate(
         SyncMetaData.tableName,
         {'id': SyncMetaData.id, 'logicalClock': logicalClock},
       );
+    }
   }
 
   shallowCopy(obj) {

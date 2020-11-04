@@ -8,4 +8,9 @@ class ServerSyncResponse {
 
   final int logicalClock;
   final List<SyncDiff> diffs;
+
+  @override
+  String toString() {
+    return 'ServerSyncResponse: {logicalClock: $logicalClock, diffs: $diffs}';
+  }
 }

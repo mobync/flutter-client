@@ -88,39 +88,33 @@ class MyMobyncClient extends MobyncClient {
 
   @override
   Future<List<Map>> executeLocalRead(String model, {List<ReadFilter> filters}) {
-    List<Map> filteredData = db[model];
-    if (filters != null)
-      filters.forEach((filter) {
-        switch (filter.filterBy) {
-          case FilterType.inside:
-            filteredData = filteredData.where((v) {
-              return filter.data.contains(v[filter.fieldName]);
-            }).toList();
-            break;
-          case FilterType.major:
-            filteredData = filteredData.where((v) {
-              return v[filter.fieldName] > filter.data;
-            }).toList();
-            break;
-          case FilterType.majorOrEqual:
-            filteredData = filteredData.where((v) {
-              return v[filter.fieldName] >= filter.data;
-            }).toList();
-            break;
-          case FilterType.minor:
-            filteredData = filteredData.where((v) {
-              return v[filter.fieldName] < filter.data;
-            }).toList();
-            break;
-          case FilterType.minorOrEqual:
-            filteredData = filteredData.where((v) {
-              return v[filter.fieldName] <= filter.data;
-            }).toList();
-            break;
-          default:
-            break;
-        }
-      });
+    List<Map> filteredData = [];
+    for (Map v in db[model]) {
+      bool accepted = filters == null;
+      if (filters != null)
+        filters.forEach((filter) {
+          switch (filter.filterBy) {
+            case FilterType.inside:
+              accepted = filter.data.contains(v[filter.fieldName]);
+              break;
+            case FilterType.major:
+              accepted = v[filter.fieldName] > filter.data;
+              break;
+            case FilterType.majorOrEqual:
+              accepted = v[filter.fieldName] >= filter.data;
+              break;
+            case FilterType.minor:
+              accepted = v[filter.fieldName] < filter.data;
+              break;
+            case FilterType.minorOrEqual:
+              accepted = v[filter.fieldName] <= filter.data;
+              break;
+            default:
+              break;
+          }
+        });
+      if (accepted) filteredData.add(v);
+    }
 
     filteredData.sort((a, b) => (a['id'] as String).compareTo(b['id']));
 
