@@ -16,8 +16,6 @@ class ServerMockup {
     List<SyncDiff> userDiffs,
   ) {
     if (userDiffs.length > 0) {
-      serverLogicalClock = max(serverLogicalClock, userLogicalClock) + 1;
-
       userDiffs.forEach((e) {
         e.logicalClock = serverLogicalClock;
         serverDiffs.add(e);
@@ -33,7 +31,7 @@ class ServerMockup {
     List<SyncDiff> userDiffs,
   ) {
     var diffs =
-        serverDiffs.where((e) => e.logicalClock > userLogicalClock).toList();
+        serverDiffs.where((e) => e.logicalClock >= userLogicalClock).toList();
 
     mergeDiffs(userLogicalClock, userDiffs ?? []);
 

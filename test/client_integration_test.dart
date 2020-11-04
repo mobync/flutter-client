@@ -36,7 +36,7 @@ void main() {
     await client1.synchronize();
 
     int logicalClock1 = await client1.getLogicalClock();
-    expect(logicalClock1, 2);
+    expect(logicalClock1, 1);
 
     MobyncResponse res = await client1.read('model1');
     expect(res.success, true);
@@ -66,7 +66,7 @@ void main() {
     ]);
 
     int logicalClock2 = await client2.getLogicalClock();
-    expect(logicalClock2, 4);
+    expect(logicalClock2, 2);
   });
 
   test('client 1 synchronizes', () async {
@@ -81,7 +81,7 @@ void main() {
     ]);
 
     int logicalClock1 = await client1.getLogicalClock();
-    expect(logicalClock1, 6);
+    expect(logicalClock1, 3);
   });
 
   test('client 2 synchronizes', () async {
@@ -96,7 +96,7 @@ void main() {
     ]);
 
     int logicalClock2 = await client2.getLogicalClock();
-    expect(logicalClock2, 6);
+    expect(logicalClock2, 3);
   });
 
   test('client 2 updates client 1 object and both synchronizes', () async {
@@ -116,7 +116,7 @@ void main() {
     ]);
 
     int logicalClock1 = await client1.getLogicalClock();
-    expect(logicalClock1, 8);
+    expect(logicalClock1, 4);
 
     MobyncResponse res2 = await client2.read('model1');
     expect(res2.success, true);
@@ -127,7 +127,7 @@ void main() {
     ]);
 
     int logicalClock2 = await client2.getLogicalClock();
-    expect(logicalClock2, 8);
+    expect(logicalClock2, 4);
   });
 
   test('client 1 deletes client 2 object and both synchronizes', () async {
