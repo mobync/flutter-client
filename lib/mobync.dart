@@ -1,6 +1,7 @@
 library mobync;
 
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:mobync/constants/constants.dart';
 import 'package:mobync/models/models.dart';
@@ -154,8 +155,19 @@ abstract class MobyncClient {
       int logicalClock, List<SyncDiff> localDiffs) async {
     try {
       String body = jsonEncode({
-        'logicalClock': await getLogicalClock(),
-        'diffs': localDiffs.map((e) => e.toMap()).toList(),
+        'auth_token': 'asdf',
+        'logical_clock': await getLogicalClock(),
+        'diffs': localDiffs
+            .map((e) => {
+                  'id': e.id,
+                  'owner': 'asdf',
+                  'logical_clock': e.logicalClock,
+                  'utc_timestamp': e.utcTimestamp,
+                  'type': describeEnum(e.type),
+                  'model': e.model,
+                  'json_data': e.jsonData,
+                })
+            .toList(),
       });
 
       http.Response resp = await http.post(syncEndpoint,
@@ -163,12 +175,28 @@ abstract class MobyncClient {
 
       if (resp.statusCode.toString().startsWith('2')) {
         Map res = jsonDecode(resp.body);
-        List<SyncDiff> syncDiffs =
-            (res['diffs'] as List).map((e) => SyncDiff.fromMap(e)).toList();
+//        print(res);
+        List<SyncDiff> syncDiffs = (res['diffs'] as List)
+            .map((e) {
+//              print(e);
+              print(SyncDiffTypesReversedMap[e['type']]);
+              var a =SyncDiff(
+                id: e['id'],
+                jsonData: e['json_data'],
+                logicalClock: e['logical_clock'],
+                model: e['model'],
+                type: SyncDiffTypesReversedMap[e['type']],
+                utcTimestamp: e['utc_timestamp']);
+//              print(a);
+              return a;
+            }).toList();
+
+//        print(syncDiffs);
+
         syncDiffs.sort();
         return Future.value(ServerSyncResponse(
           success: true,
-          logicalClock: res['logicalClock'],
+          logicalClock: res['logical_clock'],
           diffs: syncDiffs,
         ));
       } else {
