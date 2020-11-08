@@ -1,5 +1,5 @@
 class SyncMetaData {
-  SyncMetaData({this.logicalClock});
+  SyncMetaData({this.logicalClock}) : assert(logicalClock >= 0);
 
   static final String tableName = 'SyncMetaDataTable';
   static final id = '0';

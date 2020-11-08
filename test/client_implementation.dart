@@ -80,11 +80,16 @@ class MyMobyncClient extends MobyncClient {
     return Future.value(filteredData);
   }
 
+  @override
+  Future<String> getAuthToken() {
+    return Future.value('foo bar');
+  }
+
   String get syncEndpoint => "http://127.0.0.1:5000/sync";
 
   @override
   Future<ServerSyncResponse> postSyncEndpoint(
-      int logicalClock, List<SyncDiff> localDiffs) async {
+      int logicalClock, List<SyncDiff> localDiffs, String authToken) async {
     ServerMockup instance = ServerMockup.instance;
     ServerSyncResponse res =
         await instance.syncEndpoint(logicalClock, localDiffs);

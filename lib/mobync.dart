@@ -12,6 +12,7 @@ abstract class MobyncClient {
   Future<int> commitLocalUpdate(String model, Map<String, dynamic> data);
   Future<int> commitLocalDelete(String model, String id);
   Future<List<Map>> executeLocalRead(String model, {List<ReadFilter> filters});
+  Future<String> getAuthToken();
   String get syncEndpoint;
 
   Future<MobyncResponse> create(String model, Map metadata) async {
@@ -27,7 +28,6 @@ abstract class MobyncClient {
             model: model,
             jsonData: jsonEncode(metadata),
           ).toMap());
-
       return Future.value(MobyncResponse(
         success: true,
         message: 'Objected created.',
@@ -110,7 +110,12 @@ abstract class MobyncClient {
   Future<void> synchronize() async {
     int logicalClock = await getLogicalClock();
     List<SyncDiff> localDiffs = await getSyncDiffs();
-    ServerSyncResponse res = await postSyncEndpoint(logicalClock, localDiffs);
+    String authToken = await getAuthToken();
+    ServerSyncResponse res = await postSyncEndpoint(
+      logicalClock,
+      localDiffs,
+      authToken,
+    );
 
     if (res.success) {
       if (res.logicalClock > logicalClock) {
@@ -152,11 +157,11 @@ abstract class MobyncClient {
   }
 
   Future<ServerSyncResponse> postSyncEndpoint(
-      int logicalClock, List<SyncDiff> localDiffs) async {
+      int logicalClock, List<SyncDiff> localDiffs, String authToken) async {
     try {
       String body = jsonEncode({
-        'auth_token': 'asdf',
-        'logical_clock': await getLogicalClock(),
+        'auth_token': authToken,
+        'logical_clock': logicalClock,
         'diffs': localDiffs
             .map((e) => {
                   'id': e.id,

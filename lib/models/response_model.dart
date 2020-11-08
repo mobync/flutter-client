@@ -7,7 +7,7 @@ class MobyncResponse {
     @required this.success,
     this.message,
     this.data,
-  });
+  }) : assert(success != null);
 
   final bool success;
   final String message;

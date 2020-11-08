@@ -6,7 +6,8 @@ class ServerSyncResponse {
     this.message,
     this.logicalClock,
     this.diffs,
-  });
+  }) : assert((success == false) ||
+            (success == true && logicalClock >= 0 && diffs is List));
 
   final bool success;
   final String message;

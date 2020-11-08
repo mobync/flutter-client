@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobync/constants/constants.dart';
@@ -10,7 +12,12 @@ class SyncDiff extends Comparable with EquatableMixin {
     this.type,
     this.model,
     this.jsonData,
-  });
+  }) : assert(id != null &&
+            logicalClock >= 0 &&
+            utcTimestamp >= 0 &&
+            type != null &&
+            model.length > 0 &&
+            jsonDecode(jsonData) is Map);
 
   static final String tableName = 'MobyncSyncDiffsTable';
   String id, model, jsonData;
