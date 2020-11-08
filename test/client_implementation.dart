@@ -56,7 +56,7 @@ class MyMobyncClient extends MobyncClient {
   };
 
   @override
-  Future<Map> commitLocalCreate(String model, Map data) {
+  Future<int> commitLocalCreate(String model, Map data) {
     for (int i = 0; i < db[model].length; i++)
       if (db[model][i]['id'] == data['id']) {
         throw Exception('Id already exists for $model and $data!');
@@ -64,30 +64,29 @@ class MyMobyncClient extends MobyncClient {
 
     db[model].add(data);
 
-    return Future.value(db[model][db[model].length - 1]);
+    return Future.value(1);
   }
 
   @override
-  Future<Map> commitLocalUpdate(String model, Map data) {
+  Future<int> commitLocalUpdate(String model, Map data) {
     for (int i = 0; i < db[model].length; i++)
       if (db[model][i]['id'] == data['id']) {
         data.forEach((key, value) {
           db[model][i][key] = value;
         });
-        return Future.value(db[model][i]);
+        return Future.value(1);
       }
-    return Future.value(null);
+    return Future.value(0);
   }
 
   @override
-  Future<Map> commitLocalDelete(String model, String id) {
-    var removedAt;
+  Future<int> commitLocalDelete(String model, String id) {
     for (int i = 0; i < db[model].length; i++)
       if (db[model][i]['id'] == id) {
-        removedAt = db[model].removeAt(i);
+        db[model].removeAt(i);
+        return Future.value(1);
       }
-
-    return Future.value(removedAt);
+    return Future.value(0);
   }
 
   @override

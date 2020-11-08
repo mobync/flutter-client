@@ -7,9 +7,9 @@ import 'package:mobync/models/models.dart';
 import 'package:uuid/uuid.dart';
 
 abstract class MobyncClient {
-  Future<Map> commitLocalCreate(String model, Map<String, dynamic> data);
-  Future<Map> commitLocalUpdate(String model, Map<String, dynamic> data);
-  Future<Map> commitLocalDelete(String model, String id);
+  Future<int> commitLocalCreate(String model, Map<String, dynamic> data);
+  Future<int> commitLocalUpdate(String model, Map<String, dynamic> data);
+  Future<int> commitLocalDelete(String model, String id);
   Future<List<Map>> executeLocalRead(String model, {List<ReadFilter> filters});
   String get syncEndpoint;
 
@@ -129,7 +129,7 @@ abstract class MobyncClient {
 
   Future<void> executeSyncDiffs(List<SyncDiff> diffs) async {
     diffs.forEach((el) async {
-      Map res;
+      int res;
       Map data = jsonDecode(el.jsonData);
       switch (el.type) {
         case SyncDiffType.create:
@@ -146,7 +146,7 @@ abstract class MobyncClient {
           break;
       }
 
-      if (res != null) await commitLocalCreate(SyncDiff.tableName, el.toMap());
+      if (res > 0) await commitLocalCreate(SyncDiff.tableName, el.toMap());
     });
   }
 
@@ -163,8 +163,9 @@ abstract class MobyncClient {
 
       if (resp.statusCode.toString().startsWith('2')) {
         Map res = jsonDecode(resp.body);
+        List<Map> serverDiffs = res['diffs'];
         List<SyncDiff> syncDiffs =
-            (res['diffs'] as List).map((e) => SyncDiff.fromMap(e)).toList();
+            serverDiffs.map((e) => SyncDiff.fromMap(e)).toList();
         syncDiffs.sort();
         return Future.value(ServerSyncResponse(
           success: true,
@@ -206,12 +207,12 @@ abstract class MobyncClient {
   }
 
   Future<void> setLogicalClock(int logicalClock) async {
-    Map updatedMetadata = await commitLocalUpdate(
+    int updatedMetadata = await commitLocalUpdate(
       SyncMetaData.tableName,
       {'id': SyncMetaData.id, 'logicalClock': logicalClock},
     );
 
-    if (updatedMetadata == null) {
+    if (updatedMetadata <= 0) {
       await commitLocalCreate(
         SyncMetaData.tableName,
         {'id': SyncMetaData.id, 'logicalClock': logicalClock},

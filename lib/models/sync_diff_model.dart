@@ -49,6 +49,8 @@ class SyncDiff extends Comparable with EquatableMixin {
   }
 
   Map<String, dynamic> toMap({List<String> onlyFields}) {
+
+
     Map<String, dynamic> map = {
       'id': id,
       'logicalClock': logicalClock,
