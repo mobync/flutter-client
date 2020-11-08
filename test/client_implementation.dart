@@ -20,7 +20,7 @@ class ServerMockup {
         e.logicalClock = serverLogicalClock;
         serverDiffs.add(e);
       });
-      serverDiffs.sort();
+//      serverDiffs.sort();
 
       serverLogicalClock = max(serverLogicalClock, userLogicalClock) + 1;
     }
@@ -125,14 +125,14 @@ class MyMobyncClient extends MobyncClient {
     return Future.value(filteredData);
   }
 
-  String get syncEndpoint => "";
+  String get syncEndpoint => "http://127.0.0.1:5000/sync";
 
-  @override
-  Future<ServerSyncResponse> postSyncEndpoint(
-      int logicalClock, List<SyncDiff> localDiffs) async {
-    ServerMockup instance = ServerMockup.instance;
-    ServerSyncResponse res =
-        await instance.syncEndpoint(logicalClock, localDiffs);
-    return Future.value(res);
-  }
+//  @override
+//  Future<ServerSyncResponse> postSyncEndpoint(
+//      int logicalClock, List<SyncDiff> localDiffs) async {
+//    ServerMockup instance = ServerMockup.instance;
+//    ServerSyncResponse res =
+//        await instance.syncEndpoint(logicalClock, localDiffs);
+//    return Future.value(res);
+//  }
 }

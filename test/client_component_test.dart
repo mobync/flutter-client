@@ -94,7 +94,7 @@ void main() {
     expect(res2.data, [
       {'id': 'uuid1', 'field1': 'xxx'}
     ]);
-  });
+  }, timeout: Timeout(Duration(seconds: 900)));
 
   test('Client 2 delete object and both clients sync', () async {
     MobyncResponse res1 = await client2.delete('model1', 'uuid1');
