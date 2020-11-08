@@ -111,4 +111,12 @@ void main() {
     expect(res3.success, true);
     expect(res3.data, []);
   });
+
+  test('Check logical clocks', () async {
+    int logicalClock1 = await client1.getLogicalClock();
+    expect(logicalClock1, 2);
+
+    int logicalClock2 = await client2.getLogicalClock();
+    expect(logicalClock2, 2);
+  });
 }
