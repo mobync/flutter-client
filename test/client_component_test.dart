@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mobync/models/models.dart';
 
 import 'client_implementation.dart';
+import 'local_server_mockup.dart';
 
 void main() {
   MyMobyncClient client1, client2;
