@@ -16,6 +16,6 @@ class ServerSyncResponse {
 
   @override
   String toString() {
-    return 'ServerSyncResponse: {logicalClock: $logicalClock, diffs: $diffs}';
+    return 'ServerSyncResponse: {logicalClock: $logicalClock, diffs: $diffs, success: $success, message: $message}';
   }
 }
