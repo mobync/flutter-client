@@ -9,6 +9,8 @@
 
 [![Build Status](https://travis-ci.com/mobync/flutter-client.svg?token=zEuAJYpGFRGA9Uoccaqu&branch=master)](https://travis-ci.com/mobync/flutter-client)
 
+</div>
+
 ## Introduction 
 
 Mobync is a protocol that allows mobile applications running on distributed clients to get synced to a single source of truth to manage users’ data using any storage type. Mobync users Dart and Flutter to implement this protocol and communicate to a web server written in Python.
