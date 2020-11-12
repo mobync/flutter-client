@@ -11,18 +11,40 @@
 
 </div>
 
-## Introduction 
+## Why use mobync
 
-Mobync is a protocol that allows mobile applications running on distributed clients to get synced to a single source of truth to manage users’ data using any storage type. Mobync users Dart and Flutter to implement this protocol and communicate to a web server written in Python.
+Mobync is a synchronization library aimed to facilitate online-offline sync between multiple devices for any frontend, any backend, and any database.
+
+This repository implements the Mobync client library in Flutter, which means you can start using Mobync sync on your client regardless of which backend you might be using or even which database.
+
+As Mobync aims to provide online-offline sync between client and server, you will need to use the mobync library both on your frontend application and backend.
+
+Currently, Mobync has a Dart client implementation and a Python server implementation. That means you can plug Mobync on your Flutter app and provide online-offline synchronization.
+
+### Online-offline synchronization
+
+Online-offline synchronization means that your app will work seamlessly both online and offline, the user can use without noticing any difference, and you can implement your app not worrying about this when using Mobync.
+
+Mobync will automatically make your app store your changes locally on your app's database when the user has no connection, and automatically sync the data to the backend when the user has internet.
+
+### Multiple devices support
+
+Your user can use your service across multiple devices at the same time and all will have their data synchronized with Mobync.
+
+Mobync implements a protocol that merges the user data and resolves conflicts. 
+
+Mobync's protocol allows mobile applications running on distributed clients to get synced to a single source of truth to manage users’ data using any storage type. Mobync users Dart and Flutter to implement this protocol and communicate to a web server written in Python.
+
+## Example projects
+
+You can see some example projects using mobync on [Examples](https://github.com/mobync/flutter-client/blob/master/example).
+
 
 ## Mobync Flutter Client Package
 
 Using Mobync, you will wrap your database operations in such a way that any local data will get synced to a remote server, what will allow users from multiple clients to have an offline-online experience.
 
 ## Common usage
-
-You might implement the ```MobyncClient``` abstract class. At this moment we do not support any migration system so it is up to the developer to use one from his preferences. Despite of that, the developer still have to implement the library-specific models. 
-
 ```dart
     MyMobyncClient client = MyMobyncClient.instance;
     
@@ -41,49 +63,22 @@ You might implement the ```MobyncClient``` abstract class. At this moment we do 
     await client1.synchronize();
 ```
 
-## Models
-Suppose you have a model like the following
+You might implement the ```MobyncClient``` abstract class. At this moment we do not support any migration system so it is up to the developer to use one from his preferences. Despite of that, the developer still have to implement the library-specific models. 
 
-```dart
-class MyModel {
-  MyModel({
-    this.id,
-    this.field1,
-  });
-
-  static final String tableName = 'MyModel';
-  String id, field1;
-
-  MyModel.fromMap(Map<String, dynamic> map) {
-    id = map['id'];
-    field1 = map['field1'];
-  }
-
-  Map<String, dynamic> toMap() {
-    Map<String, dynamic> map = {
-      'id': id,
-      'field1': field1,
-    };
-
-    return map;
-  }
-}
-```
-
-Then you can support the Mobync syncing for a local SQLite database as the example below.
+On the following snippet you can check out a Mobync implementation using SQLite on the client storage.
 
 ```dart
 import 'package:mobync/mobync.dart';
 import 'package:mobync/constants/constants.dart';
 import 'package:mobync/models/models.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqlitemobyncdemo/myModel.dart';
+import 'package:example/myModel.dart';
 
 class MyMobyncClient extends MobyncClient {
   MyMobyncClient._privateConstructor();
   static final MyMobyncClient instance = MyMobyncClient._privateConstructor();
 
-  String get syncEndpoint => 'http://192.168.0.70:5000/sync';
+  String get syncEndpoint => 'http://127.0.0.1:5000/sync';
 
   Database _database;
   Future<Database> get database async {
@@ -98,11 +93,6 @@ class MyMobyncClient extends MobyncClient {
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute('''
-        CREATE TABLE ${MyModel.tableName} (
-          id TEXT PRIMARY KEY,
-          field1 TEXT
-        )''');
-    await db.execute('''
         CREATE TABLE ${SyncDiff.tableName} (
           id TEXT PRIMARY KEY,
           logicalClock INTEGER,
@@ -116,30 +106,29 @@ class MyMobyncClient extends MobyncClient {
           id TEXT PRIMARY KEY,
           logicalClock INTEGER
         )''');
+    await _createMyTables(db, version);
+  }
+  
+  Future<void> _createMyTables(Database db, int version) async {
+    /// ...
   }
 
   @override
-  Future<Map> commitLocalCreate(String model, Map<String, dynamic> data) async {
+  Future<int> commitLocalCreate(String model, Map<String, dynamic> data) async {
     Database db = await database;
-    int res = await db.insert(model, data);
-    if (res == 0) return null;
+    return await db.insert(model, data);
   }
 
   @override
-  Future<Map> commitLocalUpdate(String model, Map<String, dynamic> data) async {
+  Future<int> commitLocalUpdate(String model, Map<String, dynamic> data) async {
     Database db = await database;
-    int res =
-        await db.update(model, data, where: 'id=?', whereArgs: [data['id']]);
-    if (res == 0) return null;
-    return {};
+    return await db.update(model, data, where: 'id=?', whereArgs: [data['id']]);
   }
 
   @override
-  Future<Map> commitLocalDelete(String model, String id) async {
+  Future<int> commitLocalDelete(String model, String id) async {
     Database db = await database;
-    int res = await db.delete(model, where: 'id=?', whereArgs: [id]);
-    if (res == 0) return null;
-    return {};
+    return await db.delete(model, where: 'id=?', whereArgs: [id]);
   }
 
   @override
@@ -174,12 +163,13 @@ class MyMobyncClient extends MobyncClient {
         });
       if (accepted) filteredData.add(v);
     }
-
-    filteredData.sort((a, b) => (a['id'] as String).compareTo(b['id']));
-
     return Future.value(filteredData);
+  }
+
+  @override
+  Future<String> getAuthToken() {
+    return Future.value('asdf');
   }
 }
 
 ```
-
