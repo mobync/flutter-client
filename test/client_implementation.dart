@@ -82,7 +82,7 @@ class MyMobyncClient extends MobyncClient {
 
   @override
   Future<String> getAuthToken() {
-    return Future.value('foo bar');
+    return Future.value('asdf');
   }
 
   String get syncEndpoint => "http://127.0.0.1:5000/sync";
@@ -92,7 +92,7 @@ class MyMobyncClient extends MobyncClient {
       int logicalClock, List<SyncDiff> localDiffs, String authToken) async {
     ServerMockup instance = ServerMockup.instance;
     ServerSyncResponse res =
-        await instance.syncEndpoint(logicalClock, localDiffs);
+    await instance.syncEndpoint(logicalClock, localDiffs);
     return Future.value(res);
   }
 }

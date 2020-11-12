@@ -1,6 +1,15 @@
-# Mobync
+<div align="center">
+<p>
+    <img width="80" src="https://raw.githubusercontent.com/mobync/python-server/master/examples/in_memory_server_example/example_data/images/logo-round.png">
+</p>
+<h1>The Mobync Flutter Lib</h1>
+</div>
+
+<div align="center">
 
 [![Build Status](https://travis-ci.com/mobync/flutter-client.svg?token=zEuAJYpGFRGA9Uoccaqu&branch=master)](https://travis-ci.com/mobync/flutter-client)
+
+</div>
 
 ## Introduction 
 

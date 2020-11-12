@@ -218,7 +218,7 @@ abstract class MobyncClient {
 
       if (resp.statusCode.toString().startsWith('2')) {
         Map res = jsonDecode(resp.body);
-        List<SyncDiff> syncDiffs = res['diffs']
+        List<SyncDiff> syncDiffs = (res['diffs'] as List)
             .map((e) => SyncDiff(
                 id: e['id'],
                 jsonData: e['json_data'],
