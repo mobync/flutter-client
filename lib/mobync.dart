@@ -7,14 +7,38 @@ import 'package:mobync/constants/constants.dart';
 import 'package:mobync/models/models.dart';
 import 'package:uuid/uuid.dart';
 
+/// Abstract class to wrap the local storage operations.
 abstract class MobyncClient {
+  /// You might implement the following functions
+  /// - [commitLocalCreate]
+  /// - [commitLocalUpdate]
+  /// - [commitLocalDelete]
+  /// - [executeLocalRead]
+  /// - [getAuthToken]
+  /// and the getter for
+  /// - [syncEndpoint]
+
+  /// This function creates some data from a given model into a local storage.
   Future<int> commitLocalCreate(String model, Map<String, dynamic> data);
+
+  /// This function updates some data from a given model into a local storage.
   Future<int> commitLocalUpdate(String model, Map<String, dynamic> data);
+
+  /// This function deletes some data from a given model into a local storage.
   Future<int> commitLocalDelete(String model, String id);
+
+  /// This function reads from a local storage all entries from a given model using some filters.
   Future<List<Map>> executeLocalRead(String model, {List<ReadFilter> filters});
+
+  /// This functions gets the auth token to be used on the synchronization requests.
   Future<String> getAuthToken();
+
+  /// API endpoint to make the synchronization requests.
   String get syncEndpoint;
 
+  /// Use this function to perform a create operation that might be synchronized to the remote API.
+  ///
+  /// The response is wrapped into a [MobyncResponse] object to avoid bugs.
   Future<MobyncResponse> create(String model, Map metadata) async {
     try {
       await commitLocalCreate(model, metadata);
@@ -40,6 +64,9 @@ abstract class MobyncClient {
     }
   }
 
+  /// Use this function to perform an update operation that might be synchronized to the remote API.
+  ///
+  /// The response is wrapped into a [MobyncResponse] object to avoid bugs.
   Future<MobyncResponse> update(String model, Map metadata) async {
     try {
       await commitLocalUpdate(model, metadata);
@@ -66,6 +93,9 @@ abstract class MobyncClient {
     }
   }
 
+  /// Use this function to perform a delete operation that might be synchronized to the remote API.
+  ///
+  /// The response is wrapped into a [MobyncResponse] object to avoid bugs.
   Future<MobyncResponse> delete(String model, String id) async {
     try {
       await commitLocalDelete(model, id);
@@ -92,6 +122,9 @@ abstract class MobyncClient {
     }
   }
 
+  /// Use this function to perform a read on the local storage.
+  ///
+  /// The response is wrapped into a [MobyncResponse] object to avoid bugs.
   Future<MobyncResponse> read(String model, {List<ReadFilter> filters}) async {
     try {
       List<Map> filteredData = await executeLocalRead(model, filters: filters);
@@ -107,6 +140,7 @@ abstract class MobyncClient {
     }
   }
 
+  /// Use this function to synchronize the local storage to the remote storage.
   Future<void> synchronize() async {
     int logicalClock = await getLogicalClock();
     List<SyncDiff> localDiffs = await getSyncDiffs();
@@ -120,7 +154,7 @@ abstract class MobyncClient {
     if (res.success) {
       if (res.logicalClock > logicalClock) {
         try {
-          await executeSyncDiffs(res.diffs);
+          await _executeSyncDiffs(res.diffs);
           await setLogicalClock(res.logicalClock);
         } catch (e) {
           print(e);
@@ -133,7 +167,8 @@ abstract class MobyncClient {
     }
   }
 
-  Future<void> executeSyncDiffs(List<SyncDiff> diffs) async {
+  /// This private function execute all a list of diffs received from upstream.
+  Future<void> _executeSyncDiffs(List<SyncDiff> diffs) async {
     diffs.forEach((el) async {
       int res;
       Map data = jsonDecode(el.jsonData);
@@ -156,6 +191,9 @@ abstract class MobyncClient {
     });
   }
 
+  /// This function makes the request to the synchronization endpoint on the API,
+  /// parses the response and returns a [ServerSyncResponse] that contains the new
+  /// logical clock and the new diffs from upstream.
   Future<ServerSyncResponse> postSyncEndpoint(
       int logicalClock, List<SyncDiff> localDiffs, String authToken) async {
     try {
@@ -207,6 +245,7 @@ abstract class MobyncClient {
     }
   }
 
+  /// This function gets the local diffs that have not been synchronized yet.
   Future<List<SyncDiff>> getSyncDiffs({logicalClock}) async {
     if (logicalClock == null) logicalClock = await getLogicalClock();
     List<Map> maps = await executeLocalRead(
@@ -220,6 +259,7 @@ abstract class MobyncClient {
     return diffs;
   }
 
+  /// This function gets the local logical clock.
   Future<int> getLogicalClock() async {
     int logicalClock = await executeLocalRead(
       SyncMetaData.tableName,
@@ -230,6 +270,7 @@ abstract class MobyncClient {
     return Future.value(logicalClock);
   }
 
+  /// This function sets the local logical clock.
   Future<void> setLogicalClock(int logicalClock) async {
     int updatedMetadata = await commitLocalUpdate(
       SyncMetaData.tableName,

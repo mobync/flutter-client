@@ -28,6 +28,7 @@ class SyncDiff extends Comparable with EquatableMixin {
   List<Object> get props =>
       [id, logicalClock, utcTimestamp, type, model, jsonData];
 
+  /// Comparision criteria.
   @override
   int compareTo(other) {
     if (this.logicalClock < other.logicalClock)
@@ -44,6 +45,7 @@ class SyncDiff extends Comparable with EquatableMixin {
     }
   }
 
+  /// Static from map constructor.
   SyncDiff.fromMap(Map<String, dynamic> map) {
     id = map['id'];
     logicalClock = map['logicalClock'];
@@ -55,6 +57,7 @@ class SyncDiff extends Comparable with EquatableMixin {
     jsonData = map['jsonData'];
   }
 
+  /// Static to map parser.
   Map<String, dynamic> toMap({List<String> onlyFields}) {
     Map<String, dynamic> map = {
       'id': id,

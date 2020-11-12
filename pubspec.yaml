@@ -1,6 +1,6 @@
 name: mobync
 description: Mobync is a protocol that allows mobile applications running on distributed clients to get synced to a single source of truth.
-version: 0.0.6
+version: 0.0.8
 homepage: https://github.com/mobync/flutter-client
 
 environment:
