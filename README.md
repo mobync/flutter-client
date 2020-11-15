@@ -60,9 +60,9 @@ Using Mobync, you will wrap your database operations in such a way that any loca
     MobyncResponse res = await client.delete('model1', 'uuid1');
 
     /// Synchronize.
-    await client1.synchronize();
+    await client.synchronize();
     
-    /// Read model.
+    /// Read from model.
     MobyncResponse res = await client.read('model1');
     /// Access data read.
     if(res.success)
