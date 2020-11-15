@@ -50,17 +50,23 @@ Using Mobync, you will wrap your database operations in such a way that any loca
     
     /// Create an instance.
     final obj1 = {'id': 'uuid1', 'field1': 'a', 'field2': 'b'};
-    MobyncResponse res1 = await client1.create('model1', obj1);
+    MobyncResponse res1 = await client.create('model1', obj1);
     
     /// Update an instance.
     final obj = {'id': 'uuid1', 'field1': 'x'};
-    MobyncResponse res = await client2.update('model1', obj);
+    MobyncResponse res = await client.update('model1', obj);
 
     /// Delete an instance.
-    MobyncResponse res = await client1.delete('model1', 'uuid3');
+    MobyncResponse res = await client.delete('model1', 'uuid1');
 
     /// Synchronize.
     await client1.synchronize();
+    
+    /// Read model.
+    MobyncResponse res = await client.read('model1');
+    /// Access data read.
+    if(res.success)
+        print(res.data);
 ```
 
 You might implement the ```MobyncClient``` abstract class. At this moment we do not support any migration system so it is up to the developer to use one from his preferences. Despite of that, the developer still have to implement the library-specific models. 
